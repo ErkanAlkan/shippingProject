@@ -1,12 +1,18 @@
 import React from 'react';
+import styles from './Topbar.module.css';
+import AutoComplete from './AutoComplete';
 
 const Topbar = () => {
+  const ports = ["Port of Los Angeles", "Port of New York", "Port of Rotterdam", "Port of Shanghai", "Port of Singapore", "Port of Hamburg"];
+  const middlePoints = ["Panama Canal", "Suez Canal"];
+  const vessels = ["Default", "Vessel 1", "Vessel 2", "Vessel 3"];
+
   return (
-    <div className="fixed top-0 left-1/2 transform -translate-x-1/2 bg-white shadow p-4 z-20">
-      <button className="mx-2">Origin Port</button>
-      <button className="mx-2">Middle Point(Optional)</button>
-      <button className="mx-2">Destination Port</button>
-      <button className="mx-2">Vessel</button>
+    <div className={styles.topbar}>
+      <AutoComplete placeholder="Origin Port" options={ports} required />
+      <AutoComplete placeholder="Middle Point" options={middlePoints} />
+      <AutoComplete placeholder="Destination Port" options={ports} required />
+      <AutoComplete placeholder="Vessel" options={vessels} />
     </div>
   );
 };

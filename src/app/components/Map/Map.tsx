@@ -29,7 +29,7 @@ const Map = () => {
   }, []);
 
   return (
-    <MapContainer center={[44, 12]} zoom={13} style={{ height: "100vh", width: "100%" }} className="h-screen w-full">
+    <MapContainer center={[44, 12]} zoom={4} style={{ height: "100vh", width: "100%" }} className="h-screen w-full">
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
