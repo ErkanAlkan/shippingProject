@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '~/styles/globals.css';
+import styles from './layout.module.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 import Sidebar from '~/app/components/Sidebar/Sidebar';
 import Topbar from '~/app/components/Topbar/Topbar';
+import TopbarForCarbon from '~/app/components/TopbarForCarbon/TopbarForCarbon';
 
 export default function RootLayout({
   children,
@@ -19,10 +21,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} relative min-h-screen`}>
-        <Topbar />
+      <body className={`${inter.className} ${styles.root}`}>
+        <div className={styles.topbarContainer}>
+          <Topbar />
+          <TopbarForCarbon />
+        </div>
         <Sidebar />
-        <div className="relative min-h-screen z-0">{children}</div>
+        <div className={styles.content}>{children}</div>
       </body>
     </html>
   );
