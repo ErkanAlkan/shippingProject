@@ -6,10 +6,12 @@ interface AutoCompleteProps {
   placeholder: string;
   options: string[];
   required?: boolean;
+  onSelect?: (option: string) => void;
+  selectedOption?: string;
 }
 
-const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, required = false }) => {
-  const [inputValue, setInputValue] = useState('');
+const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, required = false, onSelect, selectedOption }) => {
+  const [inputValue, setInputValue] = useState(selectedOption || '');
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const [isValid, setIsValid] = useState(!required);
@@ -17,6 +19,12 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, requi
   useEffect(() => {
     setFilteredOptions(options.slice(0, 5));
   }, [options]);
+
+  useEffect(() => {
+    if (selectedOption) {
+      setInputValue(selectedOption);
+    }
+  }, [selectedOption]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -38,6 +46,9 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, requi
     setShowOptions(false);
     if (required) {
       setIsValid(option.trim() !== '');
+    }
+    if (onSelect) {
+      onSelect(option);
     }
   };
 

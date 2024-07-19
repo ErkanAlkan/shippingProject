@@ -3,33 +3,132 @@
   top: 62px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 20px;
+  padding: 20px;
   background-color: #f8f8f8;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   z-index: 20;
-  display: flex;
-  align-items: center;
   width: 750px;
-}
-
-.inputGroup {
   display: flex;
   flex-direction: column;
-  margin-left: 20px;
+  gap: 15px;
 }
 
-.inputGroup input {
-  margin-bottom: 10px;
-}
-
-.inputGroup:last-child {
-  margin-right: 0;
+.formGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adjust gap as needed */
 }
 
 .input {
-  width: 150px;
-  padding: 8px 12px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%; /* Ensure it takes up the full width of its container */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.inputMargin {
+  margin-left: 10px;
+  flex: 1;
+}
+
+.sliderInputContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.buttonGroup {
+  position: relative;
+  display: flex;
+  width: 250px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.toggleButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.3s;
+  z-index: 2;
+  user-select: none;
+  color: black;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.toggleButton:first-child {
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+}
+
+.toggleButton:last-child {
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
+.toggleButton.active {
+  color: white;
+}
+
+.toggleButton:not(.active) {
+  color: black;
+}
+
+.buttonSlider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 33.33%;
+  background-color: #007bff;
+  border-radius: 25px;
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+.buttonSlider.middle {
+  transform: translateX(100%);
+}
+
+.buttonSlider.right {
+  transform: translateX(200%);
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.buttonReset {
+  background-color: #dc3545;
+  color: white;
+}
+
+.buttonCalculate {
+  background-color: #007bff;
+  color: white;
+}
+.select {
+  width: 220px;
+  margin: 0 10px;
+  padding: 11px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
@@ -37,47 +136,11 @@
   transition: border-color 0.3s, background-color 0.3s;
 }
 
-.input.dateInput {
-  width: 200px;
-}
-
-.input:hover {
+.select:hover {
   border-color: #aaa;
   background-color: #fff;
 }
 
-.input.invalid {
+.select.invalid {
   border-color: red;
-}
-
-.label {
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #666;
-}
-
-.buttonGroup {
-  display: flex;
-  flex-direction: column;
-  margin-left: 20px;
-  margin-top: 15px;
-}
-
-.button {
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.button.reset {
-  background-color: red;
-}
-
-.button:hover {
-  background-color: #0056b3;
 }
