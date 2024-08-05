@@ -1,63 +1,58 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
+import { useController, UseControllerProps, FieldValues } from 'react-hook-form';
 import styles from './AutoComplete.module.css';
 
-interface AutoCompleteProps {
+interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T> {
   placeholder: string;
   options: string[];
   required?: boolean;
-  onSelect?: (option: string) => void;
-  selectedOption?: string;
+  error?: boolean;
 }
 
-const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, required = false, onSelect, selectedOption }) => {
-  const [inputValue, setInputValue] = useState(selectedOption || '');
+const AutoComplete = <T extends FieldValues>({
+  placeholder,
+  options,
+  required = false,
+  name,
+  control,
+  rules,
+  defaultValue,
+  error,
+}: AutoCompleteProps<T>) => {
+  const { field } = useController<T>({ name, control, rules, defaultValue });
+  const [inputValue, setInputValue] = useState<string>(field.value ? String(field.value) : '');
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
-  const [isValid, setIsValid] = useState(!required);
 
   useEffect(() => {
     setFilteredOptions(options.slice(0, 5));
   }, [options]);
 
   useEffect(() => {
-    if (selectedOption) {
-      setInputValue(selectedOption);
-    }
-  }, [selectedOption]);
+    setInputValue(field.value ? String(field.value) : '');
+  }, [field.value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
-    setFilteredOptions(options.filter(option => option.toLowerCase().includes(value.toLowerCase())));
+    setFilteredOptions(options.filter(option => option.toLowerCase().includes(value.toLowerCase())).slice(0, 5));
     setShowOptions(true);
-    if (required) {
-      setIsValid(value.trim() !== '');
-    }
-  };
-
-  const handleFocus = () => {
-    setShowOptions(true);
-    setFilteredOptions(options.slice(0, 5));
+    field.onChange(value);
   };
 
   const handleSelect = (option: string) => {
     setInputValue(option);
+    setFilteredOptions([]);
     setShowOptions(false);
-    if (required) {
-      setIsValid(option.trim() !== '');
-    }
-    if (onSelect) {
-      onSelect(option);
-    }
+    field.onChange(option);
   };
 
   const handleBlur = () => {
     setTimeout(() => {
       setShowOptions(false);
-      if (required) {
-        setIsValid(inputValue.trim() !== '');
-      }
+      field.onBlur();
     }, 200);
   };
 
@@ -68,9 +63,9 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({ placeholder, options, requi
         placeholder={placeholder}
         value={inputValue}
         onChange={handleChange}
-        onFocus={handleFocus}
+        onFocus={() => setShowOptions(true)}
         onBlur={handleBlur}
-        className={`${styles.input} ${required && !isValid ? styles.invalid : ''}`}
+        className={`${styles.input} ${error ? styles.invalid : ''} ${required ? styles.required : ''}`}
       />
       {showOptions && filteredOptions.length > 0 && (
         <ul className={styles.options}>

@@ -1,14 +1,13 @@
 .topbarForCarbon {
   position: absolute;
-  top: 62px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 120px;
+  right: 0;
   padding: 20px;
   background-color: #f8f8f8;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   z-index: 20;
-  width: 750px;
+  width: 590px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -17,7 +16,7 @@
 .formGroup {
   display: flex;
   align-items: center;
-  gap: 10px; /* Adjust gap as needed */
+  gap: 10px;
 }
 
 .input {
@@ -25,8 +24,8 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
-  width: 100%; /* Ensure it takes up the full width of its container */
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .inputMargin {
@@ -89,9 +88,9 @@
   left: 0;
   width: 33.33%;
   background-color: #007bff;
-  border-radius: 25px;
   transition: transform 0.3s ease;
   z-index: 1;
+  border-radius: 25px;
 }
 
 .buttonSlider.middle {
@@ -125,8 +124,8 @@
   background-color: #007bff;
   color: white;
 }
+
 .select {
-  width: 220px;
   margin: 0 10px;
   padding: 11px;
   border: 1px solid #ddd;
@@ -143,4 +142,31 @@
 
 .select.invalid {
   border-color: red;
+}
+
+.placeholderSelected {
+  color: #999;
+}
+
+.placeholderOption {
+  color: #999 !important;
+}
+
+.normalOption {
+  color: #333;
+}
+
+.vesselContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fullWidthAutoComplete {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.fullWidthAutoComplete > * {
+  width: 100%;
 }

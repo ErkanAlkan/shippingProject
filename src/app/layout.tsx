@@ -3,31 +3,23 @@ import { Inter } from 'next/font/google';
 import '~/styles/globals.css';
 import styles from './layout.module.css';
 
+import ClientRootLayout from './ClientRootLayout';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Your App Title',
-  description: 'Your App Description',
+  title: 'Shipping Project',
+  description: 'Shipping Project for intercontinental shipping purposes',
 };
 
-import Sidebar from '~/app/components/Sidebar/Sidebar';
-import Topbar from '~/app/components/Topbar/Topbar';
-import TopbarForCarbon from '~/app/components/TopbarForCarbon/TopbarForCarbon';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+      </head>
       <body className={`${inter.className} ${styles.root}`}>
-        <div className={styles.topbarContainer}>
-          <Topbar />
-          <TopbarForCarbon />
-        </div>
-        <Sidebar />
-        <div className={styles.content}>{children}</div>
+        <ClientRootLayout>{children}</ClientRootLayout>
       </body>
     </html>
   );
