@@ -1,6 +1,8 @@
 "use client";
 
-import Map from '~/app/components/Map/Map';
+import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('~/app/components/Map/Map'), { ssr: false });
 
 const HomePage = () => (
   <div className="relative min-h-screen">
@@ -9,3 +11,4 @@ const HomePage = () => (
 );
 
 export default HomePage;
+

@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model connector_connector {
+  longitude       Decimal? @db.Decimal(10, 7)
+  latitude        Decimal? @db.Decimal(10, 7)
+  cumulative_dist Decimal? @db.Decimal(10, 2)
+  path_len        Decimal? @db.Decimal(10, 2)
+  point_type      String?  @db.Char(1)
+  move_time       Int
+  origin          String   @db.VarChar(255)
+  destination     String   @db.VarChar(255)
+  partial_dist    Decimal? @db.Decimal(10, 2)
+
+  @@id([move_time, origin, destination])
+}
+
+model origin_connector {
+  longitude       Decimal? @db.Decimal(10, 7)
+  latitude        Decimal? @db.Decimal(10, 7)
+  cumulative_dist Decimal? @db.Decimal(10, 2)
+  path_len        Decimal? @db.Decimal(10, 2)
+  point_type      String?  @db.Char(1)
+  move_time       Int
+  destination     String   @db.VarChar(255)
+  partial_dist    Decimal? @db.Decimal(10, 2)
+  origin          String   @db.VarChar(255)
+
+  @@id([destination, origin, move_time])
+}
+
+model origin_destination {
+  longitude       Decimal? @db.Decimal(10, 7)
+  latitude        Decimal? @db.Decimal(10, 7)
+  cumulative_dist Decimal? @db.Decimal(10, 2)
+  path_len        Decimal? @db.Decimal(10, 2)
+  point_type      String?  @db.Char(1)
+  move_time       Int
+  partial_dist    Decimal? @db.Decimal(10, 2)
+  origin          String   @db.VarChar(255)
+  destination     String   @db.VarChar(255)
+
+  @@id([destination, origin, move_time])
+}

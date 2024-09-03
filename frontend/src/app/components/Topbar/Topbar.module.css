@@ -7,30 +7,60 @@
   padding-bottom: 0;
   z-index: 21;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   border-radius: 8px;
   width: 590px;
 }
 
+.row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.inputContainer {
+  flex: 1;
+}
+
 .formGroup {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  margin-bottom: 10px;
+}
+
+.label {
+  margin-right: 10px;
+  font-size: 0.875rem;
+  color: #333;
+  width: 120px;
+  text-align: right;
+}
+
+.inputField {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
-.formGroup:last-child {
-  margin-right: 0;
+.inputField input {
+  width: 100%;
+  margin-bottom: 5px;
 }
 
 .error {
   color: red;
   font-size: 0.875rem;
-  height: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  display: block;
 }
 
 .invalid input {

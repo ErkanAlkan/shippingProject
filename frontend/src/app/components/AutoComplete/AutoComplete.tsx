@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { useController, UseControllerProps, FieldValues } from 'react-hook-form';
 import styles from './AutoComplete.module.css';
 
@@ -9,9 +7,10 @@ interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T>
   options: string[];
   required?: boolean;
   error?: boolean;
+  onSelectionChange?: (value: string) => void;
 }
 
-const AutoComplete = <T extends FieldValues>({
+const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(({
   placeholder,
   options,
   required = false,
@@ -20,14 +19,15 @@ const AutoComplete = <T extends FieldValues>({
   rules,
   defaultValue,
   error,
-}: AutoCompleteProps<T>) => {
-  const { field } = useController<T>({ name, control, rules, defaultValue });
+  onSelectionChange,
+}, ref) => {
+  const { field } = useController<any>({ name, control, rules, defaultValue });
   const [inputValue, setInputValue] = useState<string>(field.value ? String(field.value) : '');
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
-    setFilteredOptions(options.slice(0, 5));
+    setFilteredOptions(options.slice(0, 5)); // Initial option filtering
   }, [options]);
 
   useEffect(() => {
@@ -47,6 +47,9 @@ const AutoComplete = <T extends FieldValues>({
     setFilteredOptions([]);
     setShowOptions(false);
     field.onChange(option);
+    if (onSelectionChange) {
+      onSelectionChange(option);
+    }
   };
 
   const handleBlur = () => {
@@ -66,6 +69,7 @@ const AutoComplete = <T extends FieldValues>({
         onFocus={() => setShowOptions(true)}
         onBlur={handleBlur}
         className={`${styles.input} ${error ? styles.invalid : ''} ${required ? styles.required : ''}`}
+        ref={ref}
       />
       {showOptions && filteredOptions.length > 0 && (
         <ul className={styles.options}>
@@ -78,6 +82,8 @@ const AutoComplete = <T extends FieldValues>({
       )}
     </div>
   );
-};
+});
+
+AutoComplete.displayName = 'AutoComplete'; // Naming the component for debugging purposes
 
 export default AutoComplete;

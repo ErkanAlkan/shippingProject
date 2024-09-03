@@ -4,6 +4,7 @@ import '~/styles/globals.css';
 import styles from './layout.module.css';
 
 import ClientRootLayout from './ClientRootLayout';
+import { RouteProvider } from '~/app/context/RouteContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,14 +13,14 @@ export const metadata: Metadata = {
   description: 'Shipping Project for intercontinental shipping purposes',
 };
 
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-      </head>
+      <head></head>
       <body className={`${inter.className} ${styles.root}`}>
-        <ClientRootLayout>{children}</ClientRootLayout>
+        <RouteProvider>
+          <ClientRootLayout>{children}</ClientRootLayout>
+        </RouteProvider>
       </body>
     </html>
   );

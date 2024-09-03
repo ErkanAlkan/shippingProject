@@ -87,7 +87,7 @@ const TopbarForCarbon = () => {
             name="vessel"
             control={control}
             render={({ field }) => (
-              <AutoComplete<TopbarForCarbonFormData>
+              <AutoComplete
                 {...field}
                 control={control}
                 placeholder="Select Vessel"

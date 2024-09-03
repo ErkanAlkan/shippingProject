@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "useUnknownInCatchVariables": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["src/**/*", "prisma/**/*.ts"],
+  "exclude": ["node_modules"]
+}

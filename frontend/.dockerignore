@@ -1,0 +1,35 @@
+# Ignore node_modules directory as it will be installed in the container
+node_modules
+
+# Comment out or remove this line to include the .next directory
+# .next
+
+# Ignore local environment files (but not your tsconfig or other necessary configs)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Ignore npm and Yarn lock files (only include if you specifically want to exclude them)
+npm-debug.log
+yarn-error.log
+
+# Ignore temporary files
+*.swp
+*.log
+.DS_Store
+Thumbs.db
+
+# Ignore editor-specific configuration files
+.vscode/
+.idea/
+*.iml
+
+# Include essential project files (if necessary, exclude build artifacts)
+!src/
+!public/
+!tsconfig.json
+!package.json
+!package-lock.json
+!next.config.js

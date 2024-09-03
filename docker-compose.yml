@@ -1,0 +1,49 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app   # Bind mount for hot-reloading
+      - /app/node_modules  # Ensure node_modules is not overwritten
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development  # Set to development for hot-reloading
+    command: npm run dev  # Use nodemon to watch for changes
+    container_name: backend
+
+  db:
+    image: postgres:13
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/docker_db_initialize:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: shipping_db
+    container_name: shipping_db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app  # Bind mount for hot-reloading
+      - /app/node_modules  # Ensure node_modules is not overwritten
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: development  # Set to development for hot-reloading
+    command: npm run dev  # Use `npm run dev` for Next.js in development mode
+    container_name: frontend
+
+volumes:
+  pgdata:
