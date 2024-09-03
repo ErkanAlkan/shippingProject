@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { LatLngTuple, LatLngBounds, icon } from "leaflet";
-import { Polyline } from "react-leaflet";
+import { useMap } from "react-leaflet";
 import { useRouteContext } from "~/app/context/RouteContext";
 import "leaflet/dist/leaflet.css";
+import "leaflet.geodesic";
 
 import greenDot from "/public/leaflet/green-dot.png";
 import redDot from "/public/leaflet/red-dot.png";
@@ -27,9 +28,36 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
 
-const Map = () => {
+interface GeodesicPolylineProps {
+  positions: LatLngTuple[];
+}
+
+const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length > 1) {
+      const L = require("leaflet") as typeof import("leaflet");
+
+      const geodesicPolyline = L.geodesic(positions, {
+        weight: 2,
+        color: "blue",
+        wrap: false,
+        //steps: 8
+      }).addTo(map);
+
+      return () => {
+        map.removeLayer(geodesicPolyline);
+      };
+    }
+  }, [positions, map]);
+
+  return null;
+};
+
+const Map: React.FC = () => {
   const { globalRouteData } = useRouteContext();
-  const [routeCoordinates, setRouteCoordinates] = useState<LatLngTuple[]>([]);
+  const [adjustedCoordinates, setAdjustedCoordinates] = useState<LatLngTuple[]>([]);
 
   const FirstIcon = icon({
     iconUrl: greenDot.src,
@@ -47,44 +75,47 @@ const Map = () => {
   });
 
   useEffect(() => {
-    console.log("Global Route Data:", globalRouteData);
     if (globalRouteData && globalRouteData.length > 0) {
-      const coordinates: LatLngTuple[] = [];
+      const rawCoordinates: LatLngTuple[] = [];
+      const adjustedCoordinates: LatLngTuple[] = [];
 
       globalRouteData.forEach((point, index) => {
         const lat = parseFloat(point.latitude);
-        const lon = parseFloat(point.longitude);
+        let lon = parseFloat(point.longitude);
 
-        if (index > 0) {
-          const prevLatLng = coordinates[coordinates.length - 1];
-          const adjustedEnd = handleDateLineCrossing(prevLatLng, [lat, lon]);
-          coordinates.push(adjustedEnd);
-        } else {
-          coordinates.push([lat, lon]);
-        }
+        rawCoordinates.push([lat, lon]);
+
+        const adjustedCoords = handleDateLineCrossing(
+          adjustedCoordinates[adjustedCoordinates.length - 1],
+          [lat, lon]
+        );
+
+        adjustedCoordinates.push(adjustedCoords);
       });
 
-      setRouteCoordinates(coordinates);
-      console.log("Route Coordinates:", coordinates);
+      setAdjustedCoordinates(adjustedCoordinates);
+      console.log("Adjusted Coordinates:", adjustedCoordinates);
     }
   }, [globalRouteData]);
 
   const handleDateLineCrossing = (
-    start: LatLngTuple,
-    end: LatLngTuple
+    prev: LatLngTuple | undefined,
+    current: LatLngTuple
   ): LatLngTuple => {
-    const startLon = start[1];
-    const endLon = end[1];
-    const lonDifference = Math.abs(endLon - startLon);
+    if (!prev) return current;
+
+    const prevLon = prev[1];
+    const currLon = current[1];
+    const lonDifference = Math.abs(currLon - prevLon);
 
     if (lonDifference > 180) {
-      const adjustedLon = endLon > startLon ? endLon - 360 : endLon + 360;
-      return [end[0], adjustedLon] as LatLngTuple;
+      const adjustedLon = currLon > prevLon ? currLon - 360 : currLon + 360;
+      return [current[0], adjustedLon];
     }
-    return end;
+    return current;
   };
 
-  const maxBounds = new LatLngBounds([180, -360], [-180, 360]);
+  const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 360]);
 
   return (
     <MapContainer
@@ -101,43 +132,26 @@ const Map = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      {routeCoordinates.map((position, index) => {
-        if (index > 0 && index < routeCoordinates.length - 1) {
-          return (
-            <Marker key={index} position={position} icon={MiddleIcon}>
-              <Popup>
-                Point: {index + 1} <br />
-                Latitude: {position[0]}, Longitude: {position[1]}
-              </Popup>
-            </Marker>
-          );
-        }
-        return null;
-      })}
-      {routeCoordinates.length > 1 && (
+      {adjustedCoordinates.map((position, index) => (
         <Marker
-          key={"last-point"}
-          position={routeCoordinates[routeCoordinates.length - 1]}
-          icon={LastIcon}
+          key={index}
+          position={position}
+          icon={
+            index === 0
+              ? FirstIcon
+              : index === adjustedCoordinates.length - 1
+              ? LastIcon
+              : MiddleIcon
+          }
         >
           <Popup>
-            Point: {routeCoordinates.length} <br />
-            Latitude: {routeCoordinates[routeCoordinates.length - 1][0]},
-            Longitude: {routeCoordinates[routeCoordinates.length - 1][1]}
+            Point: {index + 1} <br />
+            Latitude: {position[0]}, Longitude: {position[1]}
           </Popup>
         </Marker>
-      )}
-      {routeCoordinates.length > 0 && (
-        <Marker key={"first-point"} position={routeCoordinates[0]} icon={FirstIcon}>
-          <Popup>
-            Point: 1 <br />
-            Latitude: {routeCoordinates[0][0]}, Longitude: {routeCoordinates[0][1]}
-          </Popup>
-        </Marker>
-      )}
-
-      {routeCoordinates.length > 1 && (
-        <Polyline positions={routeCoordinates} color="blue" />
+      ))}
+      {adjustedCoordinates.length > 1 && (
+        <GeodesicPolyline positions={adjustedCoordinates} />
       )}
     </MapContainer>
   );
