@@ -43,7 +43,6 @@ const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
         weight: 2,
         color: "blue",
         wrap: false,
-        //steps: 8
       }).addTo(map);
 
       return () => {
@@ -55,9 +54,22 @@ const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
   return null;
 };
 
+const SetViewOnRouteData: React.FC<{ center: LatLngTuple }> = ({ center }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 3);
+    }
+  }, [center, map]);
+
+  return null;
+};
+
 const Map: React.FC = () => {
   const { globalRouteData } = useRouteContext();
   const [adjustedCoordinates, setAdjustedCoordinates] = useState<LatLngTuple[]>([]);
+  const [center, setCenter] = useState<LatLngTuple | null>(null);
 
   const FirstIcon = icon({
     iconUrl: greenDot.src,
@@ -94,7 +106,12 @@ const Map: React.FC = () => {
       });
 
       setAdjustedCoordinates(adjustedCoordinates);
+
+      const meanLatLon = calculateMeanLatLon(adjustedCoordinates);
+      setCenter(meanLatLon);
+
       console.log("Adjusted Coordinates:", adjustedCoordinates);
+      console.log("center: ", meanLatLon);
     }
   }, [globalRouteData]);
 
@@ -115,7 +132,15 @@ const Map: React.FC = () => {
     return current;
   };
 
-  const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 360]);
+  const calculateMeanLatLon = (coordinates: LatLngTuple[]): LatLngTuple => {
+    const totalPoints = coordinates.length;
+    const sumLat = coordinates.reduce((sum, coord) => sum + coord[0], 0);
+    const sumLon = coordinates.reduce((sum, coord) => sum + coord[1], 0);
+
+    return [sumLat / totalPoints, sumLon / totalPoints];
+  };
+
+  const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 540]);
 
   return (
     <MapContainer
@@ -153,6 +178,7 @@ const Map: React.FC = () => {
       {adjustedCoordinates.length > 1 && (
         <GeodesicPolyline positions={adjustedCoordinates} />
       )}
+      {center && <SetViewOnRouteData center={center} />}
     </MapContainer>
   );
 };
