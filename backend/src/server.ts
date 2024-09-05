@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import prisma from './prisma';
-import routes from './routes/routes';
+import routes from './routes/shipRoutes/shipRoutes';
 
 dotenv.config();
 const app = express();

@@ -48,3 +48,27 @@ model origin_destination {
 
   @@id([destination, origin, move_time])
 }
+
+model vessel {
+  id                   String     @id @default(uuid()) // UUID olarak tanımlandı
+  name                 String
+  design_speed         Decimal    @db.Decimal(5, 2)
+  max_draft_level      Decimal    @db.Decimal(5, 2)
+  light_ship_weight    Decimal    @db.Decimal(10, 2)
+  deadweight           Decimal    @db.Decimal(10, 2)
+  
+  vesselVariables      vessel_variables[]
+}
+
+model vessel_variables {
+  id                       String     @id @default(uuid())  // UUID olarak tanımlandı
+  current_vessel_speed     Decimal    @db.Decimal(5, 2)
+  current_draft_level      Decimal    @db.Decimal(5, 2)
+  main_engine_fuel         Decimal    @db.Decimal(10, 2)
+  auxiliary_engine_fuel    Decimal    @db.Decimal(10, 2)
+  total_fuel_usage         Decimal    @db.Decimal(10, 2)
+  
+  vesselId                 String
+  vessel                   vessel  @relation(fields: [vesselId], references: [id])
+}
+

@@ -1,4 +1,4 @@
-import { PrismaClient, origin_destination } from '@prisma/client'; // Notice the snake_case here
+import { PrismaClient, origin_destination } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

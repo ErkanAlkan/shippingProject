@@ -20,8 +20,12 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
       <Sidebar /> 
       <div className={styles.mainContent}>
         <div className={styles.topbarContainer}>
-          {showTopbar && <Topbar />}
-          {showTopbarForCarbon && <TopbarForCarbon />}
+          <div className={showTopbar ? styles.visible : styles.hidden}>
+            <Topbar />
+          </div>
+          <div className={showTopbarForCarbon ? styles.visible : styles.hidden}>
+            <TopbarForCarbon />
+          </div>
         </div>
         <div className={styles.content}>{children}</div>
       </div>

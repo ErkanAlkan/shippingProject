@@ -12,21 +12,13 @@ import greenDot from "/public/leaflet/green-dot.png";
 import redDot from "/public/leaflet/red-dot.png";
 import blueDot from "/public/leaflet/blue-dot.png";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
+const Tooltip = dynamic(() => import("react-leaflet").then((mod) => mod.Tooltip), { ssr: false });
 
 interface GeodesicPolylineProps {
   positions: LatLngTuple[];
@@ -70,6 +62,8 @@ const Map: React.FC = () => {
   const { globalRouteData } = useRouteContext();
   const [adjustedCoordinates, setAdjustedCoordinates] = useState<LatLngTuple[]>([]);
   const [center, setCenter] = useState<LatLngTuple | null>(null);
+  const [isOriginPopupOpen, setIsOriginPopupOpen] = useState(false);
+  const [isDestinationPopupOpen, setIsDestinationPopupOpen] = useState(false);
 
   const FirstIcon = icon({
     iconUrl: greenDot.src,
@@ -109,9 +103,6 @@ const Map: React.FC = () => {
 
       const meanLatLon = calculateMeanLatLon(adjustedCoordinates);
       setCenter(meanLatLon);
-
-      console.log("Adjusted Coordinates:", adjustedCoordinates);
-      console.log("center: ", meanLatLon);
     }
   }, [globalRouteData]);
 
@@ -142,6 +133,22 @@ const Map: React.FC = () => {
 
   const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 540]);
 
+  const handlePopupOpen = (index: number) => {
+    if (index === 0) {
+      setIsOriginPopupOpen(true);
+    } else if (index === adjustedCoordinates.length - 1) {
+      setIsDestinationPopupOpen(true);
+    }
+  };
+
+  const handlePopupClose = (index: number) => {
+    if (index === 0) {
+      setIsOriginPopupOpen(false);
+    } else if (index === adjustedCoordinates.length - 1) {
+      setIsDestinationPopupOpen(false);
+    }
+  };
+
   return (
     <MapContainer
       center={[44, 12]}
@@ -168,10 +175,43 @@ const Map: React.FC = () => {
               ? LastIcon
               : MiddleIcon
           }
+          eventHandlers={{
+            popupopen: () => handlePopupOpen(index),
+            popupclose: () => handlePopupClose(index),
+          }}
         >
+          {index === 0 && !isOriginPopupOpen && (
+            <Tooltip permanent>
+              {globalRouteData[0].origin}
+            </Tooltip>
+          )}
+          {index === adjustedCoordinates.length - 1 && !isDestinationPopupOpen && (
+            <Tooltip permanent>
+              {globalRouteData[globalRouteData.length - 1].destination}
+            </Tooltip>
+          )}
+
           <Popup>
-            Point: {index + 1} <br />
-            Latitude: {position[0]}, Longitude: {position[1]}
+            <div>
+              Point: {index + 1} <br />
+              Latitude: {position[0]}, Longitude: {position[1]} <br />
+              {index === 0 && (
+                <>
+                  Origin Port: {globalRouteData[0].origin} <br />
+                </>
+              )}
+              {index === adjustedCoordinates.length - 1 && (
+                <>
+                  Destination Port: {globalRouteData[globalRouteData.length - 1].destination} <br />
+                </>
+              )}
+              Cumulative Distance:{" "}
+              {globalRouteData[index]?.cumulative_dist !== null &&
+              globalRouteData[index]?.cumulative_dist !== undefined
+                ? globalRouteData[index].cumulative_dist.toString()
+                : "N/A"}{" "}
+              km
+            </div>
           </Popup>
         </Marker>
       ))}

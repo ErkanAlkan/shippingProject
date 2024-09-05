@@ -24,3 +24,11 @@
   z-index: 0;
   min-height: calc(100vh - 60px);
 }
+
+.visible {
+  display: block; /* Make the component visible */
+}
+
+.hidden {
+  display: none; /* Hide the component but keep it in the DOM */
+}

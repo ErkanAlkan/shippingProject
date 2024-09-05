@@ -9,10 +9,10 @@ import AutoComplete from '../AutoComplete/AutoComplete';
 
 interface TopbarForCarbonFormData {
   vessel: string;
-  totalTime?: number;
-  averageSpeed?: number;
-  startingDate: Date;
-  arrivalDate: Date;
+  totalTime?: number | null;
+  averageSpeed?: number | null;
+  startingDate?: Date | null;
+  arrivalDate?: Date | null;
   inputType: number;
 }
 
@@ -20,30 +20,38 @@ const validationSchema = Yup.object().shape({
   vessel: Yup.string().required('Vessel is required').oneOf([
     'Default', 'Vessel 1', 'Vessel 2', 'Vessel 3'
   ], 'Select a valid vessel'),
-  totalTime: Yup.number().when('inputType', {
+  totalTime: Yup.number().nullable().when('inputType', {
     is: (value: number) => value === 0,
     then: schema => schema.required('Total Time is required').min(0, 'Total Time must be greater than or equal to 0'),
     otherwise: schema => schema.nullable(),
   }),
-  averageSpeed: Yup.number().when('inputType', {
+  averageSpeed: Yup.number().nullable().when('inputType', {
     is: (value: number) => value === 1,
     then: schema => schema.required('Average Speed is required').min(0, 'Average Speed must be greater than or equal to 0'),
     otherwise: schema => schema.nullable(),
   }),
-  startingDate: Yup.date().required('Starting Date is required'),
-  arrivalDate: Yup.date().min(Yup.ref('startingDate'), 'Arrival Date cannot be before Starting Date').required('Arrival Date is required'),
+  startingDate: Yup.date().nullable().when('inputType', {
+    is: (value: number) => value === 2,
+    then: schema => schema.required('Starting Date is required'),
+    otherwise: schema => schema.nullable(),
+  }),
+  arrivalDate: Yup.date().nullable().min(Yup.ref('startingDate'), 'Arrival Date cannot be before Departure date').when('inputType', {
+    is: (value: number) => value === 2,
+    then: schema => schema.required('Arrival Date is required'),
+    otherwise: schema => schema.nullable(),
+  }),
   inputType: Yup.number().required(),
 });
 
 const TopbarForCarbon = () => {
-  const { handleSubmit, control, watch, setValue } = useForm<TopbarForCarbonFormData>({
+  const { handleSubmit, control, watch, reset, setValue } = useForm<TopbarForCarbonFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
       inputType: 0,
-      totalTime: undefined,
-      averageSpeed: undefined,
-      startingDate: new Date(),
-      arrivalDate: new Date(),
+      totalTime: null,
+      averageSpeed: null,
+      startingDate: null,
+      arrivalDate: null,
       vessel: '',
     },
   });
@@ -51,31 +59,46 @@ const TopbarForCarbon = () => {
   const [selectedOption, setSelectedOption] = React.useState<string>("");
 
   const inputType = watch('inputType');
+  const vessel = watch('vessel');
   const vessels = ["Default", "Vessel 1", "Vessel 2", "Vessel 3"];
-  const totalTimeOptions = ["None", "Starting Date", "Arrival Date"];
-  const avgSpeedOptions = ["None", "Starting Date", "Arrival Date"];
+  const totalTimeOptions = ["None", "Departure date", "Arrival Date"];
+  const avgSpeedOptions = ["None", "Departure date", "Arrival Date"];
   const exactDatesOptions = ["Starting & Arrival Dates"];
   const autoCompleteOptions = inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
 
   useEffect(() => {
+    setValue('totalTime', null);
+    setValue('averageSpeed', null);
+    setValue('startingDate', null);
+    setValue('arrivalDate', null);
+  
     if (inputType === 2) {
-      setSelectedOption(exactDatesOptions[0]);
-    } else if (inputType === 1 || inputType === 0){
-      setSelectedOption("");
+      setSelectedOption("Starting & Arrival Dates");
+    } else {
+      setSelectedOption('');
     }
-  }, [inputType]);
+  }, [inputType, setValue]);
 
   const handleReset = () => {
-    setValue('totalTime', undefined);
-    setValue('averageSpeed', undefined);
-    setValue('startingDate', new Date());
-    setValue('arrivalDate', new Date());
-    setValue('inputType', 0);
+    reset({
+      vessel,
+      totalTime: null,
+      averageSpeed: null,
+      startingDate: null,
+      arrivalDate: null,
+      inputType: 0,
+    });
     setSelectedOption('');
   };
 
   const onSubmit = (data: TopbarForCarbonFormData) => {
-    console.log(data);
+    const submissionData = {
+      ...data,
+      startingDate: selectedOption === "Departure date" || selectedOption === exactDatesOptions[0] ? data.startingDate : null,
+      arrivalDate: selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
+    };
+
+    console.log(submissionData);
   };
 
   return (
@@ -141,6 +164,7 @@ const TopbarForCarbon = () => {
             Exact Dates
           </div>
         </div>
+
         {inputType === 0 && (
           <Controller
             name="totalTime"
@@ -151,10 +175,12 @@ const TopbarForCarbon = () => {
                 type="number"
                 placeholder="Days"
                 className={`${styles.input} ${styles.inputMargin}`}
+                value={field.value ?? ""}
               />
             )}
           />
         )}
+
         {inputType === 1 && (
           <Controller
             name="averageSpeed"
@@ -165,10 +191,12 @@ const TopbarForCarbon = () => {
                 type="number"
                 placeholder="nm/h"
                 className={`${styles.input} ${styles.inputMargin}`}
+                value={field.value ?? ""}
               />
             )}
           />
         )}
+
         <select
           className={`${styles.select} ${
             selectedOption === "" ? styles.placeholderSelected : ""
@@ -187,9 +215,9 @@ const TopbarForCarbon = () => {
         </select>
       </div>
 
-      {((inputType === 0 || inputType === 1) && selectedOption === "Starting Date") || (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
+      {((inputType === 0 || inputType === 1) && selectedOption === "Departure date") || (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
         <div className={styles.formGroup}>
-          <label>Starting Date</label>
+          <label>Departure date</label>
           <Controller
             name="startingDate"
             control={control}
@@ -197,8 +225,8 @@ const TopbarForCarbon = () => {
               <input
                 {...field}
                 type="datetime-local"
-                placeholder="Starting Date and Time"
-                value={field.value.toISOString().slice(0, 16)}
+                placeholder="Departure date and Time"
+                value={field.value ? field.value.toISOString().slice(0, 16) : ""}
                 onChange={(e) => field.onChange(new Date(e.target.value))}
                 className={styles.input}
               />
@@ -218,10 +246,9 @@ const TopbarForCarbon = () => {
                 {...field}
                 type="datetime-local"
                 placeholder="Arrival Date and Time"
-                value={field.value.toISOString().slice(0, 16)}
+                value={field.value ? field.value.toISOString().slice(0, 16) : ""}
                 onChange={(e) => field.onChange(new Date(e.target.value))}
                 className={styles.input}
-                min={field.value.toISOString().slice(0, 16)}
               />
             )}
           />

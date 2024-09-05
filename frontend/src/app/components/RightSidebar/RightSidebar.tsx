@@ -1,15 +1,15 @@
-"use client";
-
 import React from 'react';
 import styles from './RightSidebar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faCloud } from '@fortawesome/free-solid-svg-icons';
 
+// Define the props interface
 interface RightSidebarProps {
   onToggleTopbar: () => void;
   onToggleTopbarForCarbon: () => void;
 }
 
+// Make sure the props are passed correctly to the component
 const RightSidebar: React.FC<RightSidebarProps> = ({
   onToggleTopbar,
   onToggleTopbarForCarbon,
