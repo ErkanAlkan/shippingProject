@@ -26,9 +26,9 @@
 }
 
 .visible {
-  display: block; /* Make the component visible */
+  display: block;
 }
 
 .hidden {
-  display: none; /* Hide the component but keep it in the DOM */
+  display: none;
 }

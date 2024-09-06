@@ -19,6 +19,7 @@ interface Point {
 
 const reverseLegWithPartialDistShift = (legData: Point[]): Point[] => {
   if (legData.length === 0) return [];
+
   const reversedLeg = [...legData].reverse();
 
   if (reversedLeg.length <= 1) return reversedLeg;
@@ -38,7 +39,22 @@ const reverseLegWithPartialDistShift = (legData: Point[]): Point[] => {
     };
   });
 
-  return adjustedLeg.slice(1);
+  const swappedLeg = adjustedLeg.map((point, index) => {
+    if (index === 0) {
+      return {
+        ...point,
+        origin: point.destination,
+        destination: point.origin,
+      };
+    }
+    return {
+      ...point,
+      origin: point.destination,
+      destination: point.origin,
+    };
+  });
+
+  return swappedLeg.slice(1);
 };
 
 const formatPointData = (point: any): Point => ({
