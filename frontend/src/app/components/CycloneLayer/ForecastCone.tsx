@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { GeoJSON } from "react-leaflet";
 import axios from "axios";
-import { Feature, FeatureCollection, GeoJsonObject } from "geojson";  // Import GeoJSON types
+import { Feature, FeatureCollection, GeoJsonObject } from "geojson";
 
 interface ForecastConeProps {
   onDataLoad?: (data: any) => void;
 }
 
-type CycloneData = FeatureCollection;  // Use FeatureCollection from GeoJSON
+type CycloneData = FeatureCollection;
 
 const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
   const [cycloneData, setCycloneData] = useState<{
@@ -54,7 +54,7 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
     const fetchCycloneData = async () => {
       try {
         const accumulatedData: CycloneData = {
-          type: "FeatureCollection",  // Ensure that `type` is added
+          type: "FeatureCollection",
           features: []
         };
 
@@ -94,13 +94,13 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
   return (
     <>
       <GeoJSON
-        data={cycloneData.original as GeoJsonObject}  // Ensure correct type
+        data={cycloneData.original as GeoJsonObject}
         style={() => ({
           color: "red",
           weight: 2,
           opacity: 0.8,
         })}
-        onEachFeature={(feature: Feature, layer) => {  // Explicitly typing `feature`
+        onEachFeature={(feature: Feature, layer) => {
           if (feature.properties && feature.properties.STORMNAME) {
             layer.bindPopup(
               `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
@@ -110,13 +110,13 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
       />
 
       <GeoJSON
-        data={cycloneData.minus360 as GeoJsonObject}  // Ensure correct type
+        data={cycloneData.minus360 as GeoJsonObject}
         style={() => ({
           color: "red",
           weight: 2,
           opacity: 0.5,
         })}
-        onEachFeature={(feature: Feature, layer) => {  // Explicitly typing `feature`
+        onEachFeature={(feature: Feature, layer) => {
           if (feature.properties && feature.properties.STORMNAME) {
             layer.bindPopup(
               `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
@@ -126,13 +126,13 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
       />
 
       <GeoJSON
-        data={cycloneData.plus360 as GeoJsonObject}  // Ensure correct type
+        data={cycloneData.plus360 as GeoJsonObject}
         style={() => ({
           color: "red",
           weight: 2,
           opacity: 0.5,
         })}
-        onEachFeature={(feature: Feature, layer) => {  // Explicitly typing `feature`
+        onEachFeature={(feature: Feature, layer) => {
           if (feature.properties && feature.properties.STORMNAME) {
             layer.bindPopup(
               `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`

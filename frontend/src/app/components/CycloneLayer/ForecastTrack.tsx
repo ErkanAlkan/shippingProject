@@ -52,7 +52,6 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
   useEffect(() => {
     if (!forecastTrackData || !map) return;
 
-    // Add the original forecast track
     forecastTrackData.original.features.forEach((feature: any) => {
       const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
       const geodesicPolyline = L.geodesic(coordinates, {
@@ -66,7 +65,6 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
       );
     });
 
-    // Add the -360 longitude shifted forecast track
     forecastTrackData.minus360.features.forEach((feature: any) => {
       const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
       const geodesicPolyline = L.geodesic(coordinates, {

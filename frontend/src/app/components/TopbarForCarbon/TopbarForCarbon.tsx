@@ -192,6 +192,7 @@ const TopbarForCarbon = () => {
                 placeholder="nm/h"
                 className={`${styles.input} ${styles.inputMargin}`}
                 value={field.value ?? ""}
+                min = "0"
               />
             )}
           />

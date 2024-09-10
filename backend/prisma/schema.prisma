@@ -50,7 +50,7 @@ model origin_destination {
 }
 
 model vessel {
-  id                   String     @id @default(uuid()) // UUID olarak tanımlandı
+  id                   String     @id @default(uuid())
   name                 String
   design_speed         Decimal    @db.Decimal(5, 2)
   max_draft_level      Decimal    @db.Decimal(5, 2)
@@ -61,7 +61,7 @@ model vessel {
 }
 
 model vessel_variables {
-  id                       String     @id @default(uuid())  // UUID olarak tanımlandı
+  id                       String     @id @default(uuid())
   current_vessel_speed     Decimal    @db.Decimal(5, 2)
   current_draft_level      Decimal    @db.Decimal(5, 2)
   main_engine_fuel         Decimal    @db.Decimal(10, 2)
