@@ -11,7 +11,6 @@ const RouteContext = createContext<RouteContextType | undefined>(undefined);
 
 export const RouteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [globalRouteData, setGlobalRouteData] = useState<any[]>([]);
-  console.log("globalRouteData:", globalRouteData);
   
 
   return (

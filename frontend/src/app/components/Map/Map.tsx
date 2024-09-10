@@ -91,7 +91,7 @@ const Map: React.FC = () => {
   });
 
   useEffect(() => {
-    if (globalRouteData && globalRouteData.length > 0) {
+    if (globalRouteData && globalRouteData.length > 0 && forecastConeData && observedTrackData) {
       const rawCoordinates: LatLngTuple[] = [];
       const adjustedCoordinates: LatLngTuple[] = [];
 
@@ -109,24 +109,29 @@ const Map: React.FC = () => {
       let foundIntersection = false;
 
       if (forecastConeData) {
-        const originalPolygon = forecastConeData?.original?.features[0]?.geometry?.coordinates as [number, number][][];
-        const minus360Polygon = forecastConeData?.minus360?.features[0]?.geometry?.coordinates as [number, number][][];
-        const plus360Polygon = forecastConeData?.plus360?.features[0]?.geometry?.coordinates as [number, number][][];
+        const checkIntersectionsWithFeatures = (features: any, adjustedCoordinates: LatLngTuple[]) => {
+          let index = 0;
+          for (const feature of features) {
+            index++;
+            const polygon = feature?.geometry?.coordinates as [number, number][][];
+            const intersection = checkIntersectionBetweenLineAndPolygon(
+              adjustedCoordinates,
+              polygon
+            ) as LatLngTuple | null;
+            if (intersection) {
+              return intersection;
+            }
+          }
+          return null;
+        };
 
-        const intersectionOriginal: LatLngTuple | null = checkIntersectionBetweenLineAndPolygon(
-          adjustedCoordinates,
-          originalPolygon
-        ) as LatLngTuple | null;
+        const originalFeatures = forecastConeData?.original?.features || [];
+        const minus360Features = forecastConeData?.minus360?.features || [];
+        const plus360Features = forecastConeData?.plus360?.features || [];
 
-        const intersectionMinus360: LatLngTuple | null = checkIntersectionBetweenLineAndPolygon(
-          adjustedCoordinates,
-          minus360Polygon
-        ) as LatLngTuple | null;
-
-        const intersectionPlus360: LatLngTuple | null = checkIntersectionBetweenLineAndPolygon(
-          adjustedCoordinates,
-          plus360Polygon
-        ) as LatLngTuple | null;
+        const intersectionOriginal = checkIntersectionsWithFeatures(originalFeatures, adjustedCoordinates);
+        const intersectionMinus360 = checkIntersectionsWithFeatures(minus360Features, adjustedCoordinates);
+        const intersectionPlus360 = checkIntersectionsWithFeatures(plus360Features, adjustedCoordinates);
 
         if (intersectionOriginal || intersectionMinus360 || intersectionPlus360) {
           foundIntersection = true;

@@ -51,35 +51,38 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCycloneData = async () => {
       try {
         const accumulatedData: CycloneData = {
           type: "FeatureCollection",
-          features: []
+          features: [],
         };
 
         const response = await axios.get(
           "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer/4/query?outFields=*&where=1%3D1&f=geojson"
         );
-        console.log("fetchCycloneData ~ response:", response);
 
         accumulatedData.features.push(...response.data.features);
 
         const shiftedDataMinus360 = shiftCycloneCoordinates(accumulatedData, -360);
         const shiftedDataPlus360 = shiftCycloneCoordinates(accumulatedData, 360);
 
-        setCycloneData({
-          original: accumulatedData,
-          minus360: shiftedDataMinus360,
-          plus360: shiftedDataPlus360,
-        });
-
-        if (onDataLoad) {
-          onDataLoad({
+        if (isMounted) {
+          setCycloneData({
             original: accumulatedData,
             minus360: shiftedDataMinus360,
             plus360: shiftedDataPlus360,
           });
+
+          if (onDataLoad) {
+            onDataLoad({
+              original: accumulatedData || null,
+              minus360: shiftedDataMinus360 || null,
+              plus360: shiftedDataPlus360 || null,
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching cyclone data:", error);
@@ -87,6 +90,10 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
     };
 
     fetchCycloneData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [shiftCycloneCoordinates, onDataLoad]);
 
   if (!cycloneData) return null;

@@ -47,9 +47,9 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
 
         if (onDataLoad) {
           onDataLoad({
-            original: originalData,
-            minus360: shiftedDataMinus360,
-            plus360: shiftedDataPlus360,
+            original: originalData || null,
+            minus360: shiftedDataMinus360 || null,
+            plus360: shiftedDataPlus360 || null,
           });
         }
       } catch (error) {
