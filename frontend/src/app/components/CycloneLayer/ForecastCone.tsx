@@ -94,7 +94,7 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
     return () => {
       isMounted = false;
     };
-  }, [shiftCycloneCoordinates, onDataLoad]);
+  });
 
   if (!cycloneData) return null;
 

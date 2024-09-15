@@ -1,45 +1,57 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import styles from './TopbarForCarbon.module.css';
-import AutoComplete from '../AutoComplete/AutoComplete';
+import React, { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import styles from "./TopbarForCarbon.module.css";
+import AutoComplete from "../AutoComplete/AutoComplete";
+import axios from "axios";
 
 interface TopbarForCarbonFormData {
   vessel: string;
   totalTime?: number | null;
   averageSpeed?: number | null;
-  startingDate?: Date | null;
+  departureDate?: Date | null;
   arrivalDate?: Date | null;
   inputType: number;
 }
 
 const validationSchema = Yup.object().shape({
-  vessel: Yup.string().required('Vessel is required').oneOf([
-    'Default', 'Vessel 1', 'Vessel 2', 'Vessel 3'
-  ], 'Select a valid vessel'),
-  totalTime: Yup.number().nullable().when('inputType', {
-    is: (value: number) => value === 0,
-    then: schema => schema.required('Total Time is required').min(0, 'Total Time must be greater than or equal to 0'),
-    otherwise: schema => schema.nullable(),
-  }),
-  averageSpeed: Yup.number().nullable().when('inputType', {
-    is: (value: number) => value === 1,
-    then: schema => schema.required('Average Speed is required').min(0, 'Average Speed must be greater than or equal to 0'),
-    otherwise: schema => schema.nullable(),
-  }),
-  startingDate: Yup.date().nullable().when('inputType', {
-    is: (value: number) => value === 2,
-    then: schema => schema.required('Starting Date is required'),
-    otherwise: schema => schema.nullable(),
-  }),
-  arrivalDate: Yup.date().nullable().min(Yup.ref('startingDate'), 'Arrival Date cannot be before Departure date').when('inputType', {
-    is: (value: number) => value === 2,
-    then: schema => schema.required('Arrival Date is required'),
-    otherwise: schema => schema.nullable(),
-  }),
+  vessel: Yup.string()
+    .required("Vessel is required")
+    .oneOf(["Default", "Vessel 1", "Vessel 2", "Vessel 3"], "Select a valid vessel"),
+  totalTime: Yup.number()
+    .nullable()
+    .when("inputType", {
+      is: (value: number) => value === 0,
+      then: (schema) =>
+        schema.required("Total Time is required").min(0, "Total Time must be greater than or equal to 0"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  averageSpeed: Yup.number()
+    .nullable()
+    .when("inputType", {
+      is: (value: number) => value === 1,
+      then: (schema) =>
+        schema.required("Average Speed is required").min(0, "Average Speed must be greater than or equal to 0"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  departureDate: Yup.date()
+    .nullable()
+    .when("inputType", {
+      is: (value: number) => value === 2,
+      then: (schema) => schema.required("Starting Date is required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  arrivalDate: Yup.date()
+    .nullable()
+    .min(Yup.ref("departureDate"), "Arrival Date cannot be before Departure date")
+    .when("inputType", {
+      is: (value: number) => value === 2,
+      then: (schema) => schema.required("Arrival Date is required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
   inputType: Yup.number().required(),
 });
 
@@ -50,32 +62,33 @@ const TopbarForCarbon = () => {
       inputType: 0,
       totalTime: null,
       averageSpeed: null,
-      startingDate: null,
+      departureDate: null,
       arrivalDate: null,
-      vessel: '',
+      vessel: "",
     },
   });
 
   const [selectedOption, setSelectedOption] = React.useState<string>("");
 
-  const inputType = watch('inputType');
-  const vessel = watch('vessel');
+  const inputType = watch("inputType");
+  const vessel = watch("vessel");
   const vessels = ["Default", "Vessel 1", "Vessel 2", "Vessel 3"];
   const totalTimeOptions = ["None", "Departure date", "Arrival Date"];
   const avgSpeedOptions = ["None", "Departure date", "Arrival Date"];
   const exactDatesOptions = ["Starting & Arrival Dates"];
-  const autoCompleteOptions = inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
+  const autoCompleteOptions =
+    inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
 
   useEffect(() => {
-    setValue('totalTime', null);
-    setValue('averageSpeed', null);
-    setValue('startingDate', null);
-    setValue('arrivalDate', null);
-  
+    setValue("totalTime", null);
+    setValue("averageSpeed", null);
+    setValue("departureDate", null);
+    setValue("arrivalDate", null);
+
     if (inputType === 2) {
       setSelectedOption("Starting & Arrival Dates");
     } else {
-      setSelectedOption('');
+      setSelectedOption("");
     }
   }, [inputType, setValue]);
 
@@ -84,21 +97,34 @@ const TopbarForCarbon = () => {
       vessel,
       totalTime: null,
       averageSpeed: null,
-      startingDate: null,
+      departureDate: null,
       arrivalDate: null,
       inputType: 0,
     });
-    setSelectedOption('');
+    setSelectedOption("");
   };
 
   const onSubmit = (data: TopbarForCarbonFormData) => {
     const submissionData = {
       ...data,
-      startingDate: selectedOption === "Departure date" || selectedOption === exactDatesOptions[0] ? data.startingDate : null,
-      arrivalDate: selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
+      departureDate:
+        selectedOption === "Departure date" || selectedOption === exactDatesOptions[0] ? data.departureDate : null,
+      arrivalDate:
+        selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
     };
 
-    console.log(submissionData);
+    console.log("Submitting data:", submissionData);
+
+    // Axios POST request to send the data to the backend
+    axios
+      .post("/api/calculate-stats", submissionData)
+      .then((response) => {
+        console.log("Backend response:", response.data);
+        // Handle the response from the backend here
+      })
+      .catch((error) => {
+        console.error("Error submitting data:", error);
+      });
   };
 
   return (
@@ -110,13 +136,7 @@ const TopbarForCarbon = () => {
             name="vessel"
             control={control}
             render={({ field }) => (
-              <AutoComplete
-                {...field}
-                control={control}
-                placeholder="Select Vessel"
-                options={vessels}
-                required
-              />
+              <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} required />
             )}
           />
         </div>
@@ -126,40 +146,24 @@ const TopbarForCarbon = () => {
         <div className={styles.buttonGroup}>
           <div
             className={`${styles.buttonSlider} ${
-              inputType === 1
-                ? styles.middle
-                : inputType === 2
-                ? styles.right
-                : ""
+              inputType === 1 ? styles.middle : inputType === 2 ? styles.right : ""
             }`}
           />
           <div
-            className={
-              inputType === 0
-                ? `${styles.toggleButton} ${styles.active}`
-                : styles.toggleButton
-            }
-            onClick={() => setValue('inputType', 0)}
+            className={inputType === 0 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+            onClick={() => setValue("inputType", 0)}
           >
             Total Time
           </div>
           <div
-            className={
-              inputType === 1
-                ? `${styles.toggleButton} ${styles.active}`
-                : styles.toggleButton
-            }
-            onClick={() => setValue('inputType', 1)}
+            className={inputType === 1 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+            onClick={() => setValue("inputType", 1)}
           >
             Avg Speed
           </div>
           <div
-            className={
-              inputType === 2
-                ? `${styles.toggleButton} ${styles.active}`
-                : styles.toggleButton
-            }
-            onClick={() => setValue('inputType', 2)}
+            className={inputType === 2 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+            onClick={() => setValue("inputType", 2)}
           >
             Exact Dates
           </div>
@@ -192,16 +196,14 @@ const TopbarForCarbon = () => {
                 placeholder="nm/h"
                 className={`${styles.input} ${styles.inputMargin}`}
                 value={field.value ?? ""}
-                min = "0"
+                min="0"
               />
             )}
           />
         )}
 
         <select
-          className={`${styles.select} ${
-            selectedOption === "" ? styles.placeholderSelected : ""
-          }`}
+          className={`${styles.select} ${selectedOption === "" ? styles.placeholderSelected : ""}`}
           value={selectedOption}
           onChange={(e) => setSelectedOption(e.target.value)}
         >
@@ -216,11 +218,12 @@ const TopbarForCarbon = () => {
         </select>
       </div>
 
-      {((inputType === 0 || inputType === 1) && selectedOption === "Departure date") || (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
+      {((inputType === 0 || inputType === 1) && selectedOption === "Departure date") ||
+      (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
         <div className={styles.formGroup}>
           <label>Departure date</label>
           <Controller
-            name="startingDate"
+            name="departureDate"
             control={control}
             render={({ field }) => (
               <input
@@ -236,7 +239,8 @@ const TopbarForCarbon = () => {
         </div>
       ) : null}
 
-      {((inputType === 0 || inputType === 1) && selectedOption === "Arrival Date") || (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
+      {((inputType === 0 || inputType === 1) && selectedOption === "Arrival Date") ||
+      (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
         <div className={styles.formGroup}>
           <label>Arrival Date</label>
           <Controller
@@ -257,17 +261,10 @@ const TopbarForCarbon = () => {
       ) : null}
 
       <div className={styles.buttonContainer}>
-        <button
-          type="button"
-          onClick={handleReset}
-          className={`${styles.button} ${styles.buttonReset}`}
-        >
+        <button type="button" onClick={handleReset} className={`${styles.button} ${styles.buttonReset}`}>
           Reset
         </button>
-        <button
-          type="submit"
-          className={`${styles.button} ${styles.buttonCalculate}`}
-        >
+        <button type="submit" className={`${styles.button} ${styles.buttonCalculate}`}>
           Calculate
         </button>
       </div>

@@ -294,7 +294,7 @@ const Map: React.FC = () => {
               {globalRouteData[index]?.cumulative_dist !== null && globalRouteData[index]?.cumulative_dist !== undefined
                 ? globalRouteData[index].cumulative_dist.toString()
                 : "N/A"}{" "}
-              km
+              nm
             </div>
           </Popup>
         </Marker>
