@@ -71,7 +71,7 @@ const Topbar = () => {
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
-      const response = await axios.post("/api/get-route", {
+      const response = await axios.post("/api/ship/get-route", {
         origin: data.originPort,
         destination: data.destinationPort,
         middlePoints: [data.middlePoint1, data.middlePoint2].filter(Boolean),
@@ -189,7 +189,7 @@ const Topbar = () => {
       </div>
 
       <button type="submit" className={styles.submitButton}>
-        Submit
+        Run
       </button>
     </form>
   );

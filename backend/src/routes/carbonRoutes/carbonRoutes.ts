@@ -1,135 +1,260 @@
 //carbonRoutes.ts
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import {
+  calculateWettedHullExponent,
+  calculateSpeedExponent,
+  powerRequired,
+  powerRequiredModified,
+  carbonEmission,
+  findClosestSpeeds,
+  vesselStats,
+  calculateSpeed,
+  calculateTime,
+  calculateTimeDifference,
+  emissionFactors,
+  VesselVariable,
+} from "./Calculations/Calculations";
+import { table } from "console";
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const app = express();
 app.use(express.json());
 
-async function calculateVesselStats(shipName: string, page: number, pageSize: number) {
+interface Vessel {
+  id: string;
+  imo: number;
+  name: string;
+  design_speed: number | null;
+  max_draft_level: number;
+  light_ship_weight: number | null;
+  deadweight: number;
+  hotel_load: number;
+  hotel_load_type: string;
+  tonnage_per_centimeter: number;
+  length_of_vessel: number;
+  beam_of_vessel: number;
+  vesselVariables: VesselVariable[];
+}
+
+function countLadenOrBallast(vessel: Vessel): {
+  totalLadenAndBalast: number;
+  ladenCount: number;
+  ballastCount: number;
+} {
+  if (!vessel || !vessel.vesselVariables) {
+    return { totalLadenAndBalast: 0, ladenCount: 0, ballastCount: 0 };
+  }
+
+  let totalLadenAndBalast = 0;
+  let ladenCount = 0;
+  let ballastCount = 0;
+
+  vessel.vesselVariables.forEach((item: VesselVariable) => {
+    if (item.laden_or_ballast !== null && item.laden_or_ballast !== undefined) {
+      totalLadenAndBalast++;
+      if (item.laden_or_ballast === "Laden") {
+        ladenCount++;
+      } else if (item.laden_or_ballast === "Ballast") {
+        ballastCount++;
+      }
+    }
+  });
+
+  return { totalLadenAndBalast, ladenCount, ballastCount };
+}
+
+router.post("/calculate-stats", async (req, res) => {
   try {
-    const vessel = await prisma.vessel.findFirst({
-      where: { name: shipName },
-      include: {
-        vesselVariables: {
-          skip: (page - 1) * pageSize,
-          take: pageSize,
-        },
-      },
-    });
+    let { inputType, arrivalDate, departureDate, averageSpeed, totalTime, vessel, totalDistance, draftLevel } =
+      req.body;
 
-    if (!vessel) {
-      throw new Error("Vessel not found");
+    const stats = await vesselStats(vessel, 1, 10);
+    const vesselLength = stats.length_of_vessel;
+    console.log("router.post ~ vesselLength:", vesselLength);
+    console.log("router.post ~ vesselLength:", typeof vesselLength);
+    const vesselWidth = stats.beam_of_vessel;
+    const maxDraftLevel = stats.max_draft_level;
+    let wettedHullExponent;
+    let speedExponent;
+
+    let tableContent1;
+    let tableContent2;
+
+    if (inputType === 0) {
+      tableContent1 = calculateSpeed(totalTime, totalDistance, departureDate, arrivalDate);
+    } else if (inputType === 1) {
+      tableContent1 = calculateTime(averageSpeed, totalDistance, departureDate, arrivalDate);
+    } else if (inputType === 2) {
+      tableContent1 = calculateTimeDifference(totalDistance, departureDate, arrivalDate);
     }
+    if (tableContent1) {
+      tableContent1.totalTime = Math.round(tableContent1.totalTime * 10) / 10;
+      tableContent1.averageSpeed = Math.round(tableContent1.averageSpeed * 100) / 100;
+      tableContent1.totalDistance = Math.round(tableContent1.totalDistance);
+      totalTime = tableContent1.totalTime;
+    }
+    console.log("router.post ~ tableContent1:", tableContent1);
+    const clientSpeed = tableContent1?.averageSpeed;
 
-    if (vessel.vesselVariables.length < 2) {
+    const { totalLadenAndBalast, ballastCount, ladenCount } = countLadenOrBallast(stats);
+
+    const calculateEmissionsAndPower = (
+      vesselVariables: VesselVariable[],
+      clientSpeed: number,
+      state: "Laden" | "Ballast",
+      draftLevel: number,
+      vesselLength: number,
+      vesselWidth: number,
+      maxDraftLevel: number,
+      stats: any
+    ) => {
+      const { closest, secondClosest } = findClosestSpeeds(vesselVariables, clientSpeed, state);
+
+      const closestSpeed = closest?.speed?.current_vessel_speed ?? null;
+      const closestFuelUsage1 = closest?.fuel_usage_main_1 ?? null;
+      console.log("router.post ~ closestFuelUsage1First:", closestFuelUsage1);
+      console.log("router.post ~ closestFuelUsage1First:", typeof closestFuelUsage1);
+      let closestFuelUsage1Type = closest?.fuel_usage_main_1_type ?? null;
+      const closestFuelUsage2 = closest?.fuel_usage_main_2 ?? null;
+
+      let closestFuelUsage2Type = closest?.fuel_usage_main_2_type ?? null;
+
+      const secondClosestSpeed = secondClosest?.speed?.current_vessel_speed ?? null;
+      const secondClosestFuelUsage1 = secondClosest?.fuel_usage_main_1 ?? null;
+      let secondClosestFuelUsage1Type = secondClosest?.fuel_usage_main_1_type ?? null;
+      const secondClosestFuelUsage2 = secondClosest?.fuel_usage_main_2 ?? null;
+      let secondClosestFuelUsage2Type = secondClosest?.fuel_usage_main_2_type ?? null;
+
+      const wettedHullExponent = calculateWettedHullExponent(vesselLength, vesselWidth, draftLevel, maxDraftLevel);
+
+      if (
+        closestSpeed !== null &&
+        closestFuelUsage1 !== null &&
+        secondClosestSpeed !== null &&
+        secondClosestFuelUsage1 !== null
+      ) {
+        const speedExponent = calculateSpeedExponent(
+          closestSpeed as number,
+          secondClosestSpeed as number,
+          closestFuelUsage1 as number,
+          secondClosestFuelUsage1 as number
+        );
+
+        let lightShipWeight;
+        const maxVesselWeight = stats.tonnage_per_centimeter * stats.max_draft_level * 100;
+
+        if (stats.light_ship_weight) {
+          lightShipWeight = stats.light_ship_weight;
+        } else if (stats.tonnage_per_centimeter && stats.max_draft_level && stats.deadweight) {
+          lightShipWeight = maxVesselWeight - stats.deadweight;
+        }
+
+        const currentVesselWeight = stats.tonnage_per_centimeter * draftLevel * 100;
+        const mainCalculatedPower = powerRequiredModified(
+          closestSpeed,
+          closestFuelUsage1,
+          clientSpeed,
+          maxVesselWeight,
+          currentVesselWeight,
+          wettedHullExponent,
+          speedExponent
+        );
+
+        let calculatedPower = mainCalculatedPower * totalTime;
+        let calculatedEmission = 0;
+        let secondaryPower = 0;
+
+        if (closestFuelUsage1Type) {
+          closestFuelUsage1Type = closestFuelUsage1Type.toLowerCase();
+          calculatedEmission = carbonEmission(closestFuelUsage1Type, calculatedPower);
+          console.log("router.post ~ calculatedEmission:", calculatedEmission);
+        }
+
+        if (closestFuelUsage2 && closestFuelUsage2Type) {
+          secondaryPower += Number(closestFuelUsage2 * totalTime);
+          closestFuelUsage2Type = closestFuelUsage2Type.toLowerCase();
+          const secondaryFuelEmission = carbonEmission(closestFuelUsage2Type, closestFuelUsage2);
+          console.log("router.post ~ secondaryFuelEmission:", secondaryFuelEmission);
+          calculatedEmission += secondaryFuelEmission;
+        }
+        return {
+          calculatedPower: Math.round(calculatedPower * 100) / 100,
+          calculatedEmission: Math.round(calculatedEmission * 100) / 100,
+          secondaryPower: Math.round(secondaryPower * 100) / 100,
+        };
+      }
+
       return {
-        vesselName: vessel.name,
-        totalFuelUsage: "0.00",
-        averageSpeed: "0.00",
-        totalTime: "0.00",
-        averageDraftLevel: "0.00",
-        message: "Not enough data found to process the calculations",
+        calculatedPower: 0,
+        calculatedEmission: 0,
+        secondaryPower: 0,
       };
+    };
+
+    if (totalLadenAndBalast > 1) {
+      const draftPerCent = (draftLevel / maxDraftLevel) * 100;
+
+      if (draftPerCent >= 75 && ladenCount > 1 && clientSpeed) {
+        tableContent2 = calculateEmissionsAndPower(
+          stats.vesselVariables,
+          clientSpeed,
+          "Laden",
+          draftLevel,
+          vesselLength,
+          vesselWidth,
+          maxDraftLevel,
+          stats
+        );
+      } else if (draftPerCent < 75 && ballastCount > 1 && clientSpeed) {
+        tableContent2 = calculateEmissionsAndPower(
+          stats.vesselVariables,
+          clientSpeed,
+          "Ballast",
+          draftLevel,
+          vesselLength,
+          vesselWidth,
+          maxDraftLevel,
+          stats
+        );
+      } else if (ladenCount > 1 && clientSpeed) {
+        tableContent2 = calculateEmissionsAndPower(
+          stats.vesselVariables,
+          clientSpeed,
+          "Laden",
+          draftLevel,
+          vesselLength,
+          vesselWidth,
+          maxDraftLevel,
+          stats
+        );
+      } else if (ballastCount > 1 && clientSpeed) {
+        tableContent2 = calculateEmissionsAndPower(
+          stats.vesselVariables,
+          clientSpeed,
+          "Ballast",
+          draftLevel,
+          vesselLength,
+          vesselWidth,
+          maxDraftLevel,
+          stats
+        );
+      }
     }
+    const combinedContent = {
+      ...tableContent1,
+      ...tableContent2,
+    };
+    const result = {
+      message: "Data processed successfully",
+      combinedContent,
+    };
 
-    // // Perform calculations: total fuel usage, average speed, average draft level
-    // const totalFuelUsage = vessel.vesselVariables.reduce(
-    //   (acc, curr) => acc + parseFloat(curr.total_fuel_usage.toString()),
-    //   0
-    // );
-    // const averageSpeed =
-    //   vessel.vesselVariables.reduce((acc, curr) => acc + parseFloat(curr.current_vessel_speed.toString()), 0) /
-    //   vessel.vesselVariables.length;
-    // const averageDraftLevel =
-    //   vessel.vesselVariables.reduce((acc, curr) => acc + parseFloat(curr.current_draft_level.toString()), 0) /
-    //   vessel.vesselVariables.length;
-
-    // return {
-    //   vesselName: vessel.name,
-    //   totalFuelUsage: totalFuelUsage.toFixed(2),
-    //   averageSpeed: averageSpeed.toFixed(2),
-    //   averageDraftLevel: averageDraftLevel.toFixed(2),
-    //   page: page,
-    //   pageSize: pageSize,
-    //   totalVariables: vessel.vesselVariables.length,
-    // };
+    return res.status(200).json(result);
   } catch (error) {
-    console.error(error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
+    console.error("Error processing the request:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-}
-
-function calculateTimeDifference(
-  inputType: number,
-  totalDistance: number,
-  departureDate: Date | null,
-  arrivalDate: Date | null
-) {
-  let averageSpeed;
-  if (inputType === 2) {
-    if (departureDate === null || arrivalDate === null) {
-      throw new Error("Both departureDate and arrivalDate must be provided for inputType 2.");
-    }
-
-    const requiredTimeInMilliseconds = arrivalDate.getTime() - departureDate.getTime();
-    const requiredTimeInMinutes = requiredTimeInMilliseconds / (1000 * 60);
-    const requiredTimeInHours = requiredTimeInMinutes / 60;
-    const totalTime = requiredTimeInHours / 24;
-
-    averageSpeed = totalDistance / requiredTimeInHours;
-    return { departureDate, arrivalDate, totalTime, averageSpeed };
-  }
-}
-
-function calculateTime(
-  inputType: number,
-  averageSpeed: number,
-  totalDistance: number,
-  departureDate: Date | null,
-  arrivalDate: Date | null
-) {
-  const totalTime = totalDistance / averageSpeed;
-
-  if (inputType === 1 && departureDate !== null && arrivalDate === null) {
-    let arrivalDateInMilliseconds = departureDate.getTime() + totalTime * 60 * 60 * 1000;
-    arrivalDate = new Date(arrivalDateInMilliseconds);
-
-    console.log("arrivalDate: ", arrivalDate);
-  } else if (inputType === 1 && departureDate === null && arrivalDate !== null) {
-    let departureDateInMilliseconds = arrivalDate.getTime() - totalTime * 60 * 60 * 1000;
-    departureDate = new Date(departureDateInMilliseconds);
-  }
-
-  return { departureDate, arrivalDate, totalTime, averageSpeed };
-}
-
-function calculateSpeed(
-  inputType: number,
-  totalTime: number,
-  totalDistance: number,
-  departureDate: Date | null,
-  arrivalDate: Date | null
-) {
-  const averageSpeed = totalDistance / (totalTime * 60);
-
-  if (inputType === 0 && departureDate !== null && arrivalDate === null) {
-    let arrivalDateInMilliseconds = departureDate.getTime() + totalTime * 24 * 60 * 1000;
-    arrivalDate = new Date(arrivalDateInMilliseconds);
-
-    console.log("arrivalDate: ", arrivalDate);
-  } else if (inputType === 0 && departureDate === null && arrivalDate !== null) {
-    let departureDateInMilliseconds = arrivalDate.getTime() - totalTime * 24 * 60 * 1000;
-    departureDate = new Date(departureDateInMilliseconds);
-  }
-
-  return { departureDate, arrivalDate, totalTime, averageSpeed };
-}
-
-router.post("/get-route", async (req, res) => {
-  
 });
+
+export default router;

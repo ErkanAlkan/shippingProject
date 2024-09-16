@@ -51,7 +51,7 @@ model origin_destination {
 
 model vessel {
   id                     String             @id @default(uuid())
-  imo                    Decimal
+  imo                    Int                @unique
   name                   String
   design_speed           Decimal?           @db.Decimal(4, 2)
   max_draft_level        Decimal            @db.Decimal(5, 3)
@@ -60,6 +60,8 @@ model vessel {
   hotel_load             Decimal?           @db.Decimal(10, 2)
   hotel_load_type        String?
   tonnage_per_centimeter Decimal?           @db.Decimal(5, 3)
+  length_of_vessel       Decimal            @db.Decimal(6, 3)
+  beam_of_vessel         Decimal            @db.Decimal(6, 3)
   vesselVariables        vessel_variables[]
 }
 
@@ -67,12 +69,13 @@ model vessel_variables {
   id                     String   @id @default(uuid())
   current_vessel_speed   Decimal  @db.Decimal(5, 2)
   current_draft_level    Decimal? @db.Decimal(5, 2)
-  vesselId               String
+  imo                    Int
   fuel_usage_main_1      Decimal  @db.Decimal(10, 2)
   fuel_usage_main_1_type String
   fuel_usage_main_2      Decimal? @db.Decimal(10, 2)
   fuel_usage_main_2_type String?
   hotel_load             Decimal? @db.Decimal(10, 2)
   hotel_load_type        String?
-  vessel                 vessel   @relation(fields: [vesselId], references: [id])
+  laden_or_ballast       String?
+  vessel                 vessel   @relation(fields: [imo], references: [imo])
 }

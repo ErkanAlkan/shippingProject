@@ -1,0 +1,58 @@
+.tableForCarbon {
+    position: absolute;
+    top: calc(254px + 330px);
+    right: 0;
+    padding: 10px;
+    background-color: #f8f8f8;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 499;
+    width: 590px;
+  }
+  
+  .tableContainer {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th,
+  .table td {
+    padding: 5px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+  }
+  
+  .table th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .table td {
+    color: #333;
+  }
+  
+  .table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .tableCaption {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .noDataMessage {
+    font-size: 16px;
+    color: #666;
+    padding: 20px;
+    text-align: center;
+  }
+  

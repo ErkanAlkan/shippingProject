@@ -52,7 +52,7 @@ async function processCSVAndInsertData() {
     console.log('Tables cleaned successfully.');
 
     // Connector Connector Data
-    await importCSV('C:\\Users\\erkan\\OneDrive\\Belgeler\\path\\interconnector_distance.csv', prisma.connector_connector, {
+    await importCSV('./csvFiles/interconnector_distance.csv', prisma.connector_connector, {
       longitude: (data: any) => parseFloat(data.longitude),
       latitude: (data: any) => parseFloat(data.latitude),
       cumulative_dist: (data: any) => parseFloat(data.cumulative_dist),
@@ -65,7 +65,7 @@ async function processCSVAndInsertData() {
     });
 
     // Origin Connector Data
-    await importCSV('C:\\Users\\erkan\\OneDrive\\Belgeler\\path_1\\origin_connector_distance.csv', prisma.origin_connector, {
+    await importCSV('./csvFiles/origin_connector_distance.csv', prisma.origin_connector, {
       longitude: (data: any) => parseFloat(data.longitude),
       latitude: (data: any) => parseFloat(data.latitude),
       cumulative_dist: (data: any) => parseFloat(data.cumulative_dist),
@@ -78,7 +78,7 @@ async function processCSVAndInsertData() {
     });
 
     // Origin Destination Data
-    await importCSV('C:\\Users\\erkan\\OneDrive\\Belgeler\\path_2\\origin_destination_direct_distance.csv', prisma.origin_destination, {
+    await importCSV('./csvFiles/origin_destination_direct_distance.csv', prisma.origin_destination, {
       longitude: (data: any) => parseFloat(data.longitude),
       latitude: (data: any) => parseFloat(data.latitude),
       cumulative_dist: (data: any) => parseFloat(data.cumulative_dist),

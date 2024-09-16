@@ -6,7 +6,7 @@
   background-color: #f8f8f8;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  z-index: 20;
+  z-index: 499;
   width: 590px;
   display: flex;
   flex-direction: column;
@@ -56,11 +56,11 @@
   justify-content: center;
   cursor: pointer;
   transition: color 0.3s;
-  z-index: 2;
   user-select: none;
   color: black;
   padding: 10px 0;
   font-size: 14px;
+  z-index: 501;
 }
 
 .toggleButton:first-child {
@@ -89,7 +89,6 @@
   width: 33.33%;
   background-color: #007bff;
   transition: transform 0.3s ease;
-  z-index: 1;
   border-radius: 25px;
 }
 

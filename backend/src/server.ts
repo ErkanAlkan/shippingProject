@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import prisma from './prisma';
 import routes from './routes/shipRoutes/shipRoutes';
+import carbonRoutes from './routes/carbonRoutes/carbonRoutes';
 
 dotenv.config();
 const app = express();
@@ -13,7 +13,8 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 
-app.use('/api', routes);
+app.use('/api/ship', routes);
+app.use('/api/carbon', carbonRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

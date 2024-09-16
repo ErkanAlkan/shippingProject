@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import styles from "./TopbarForCarbon.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
 import axios from "axios";
+import { useRouteContext } from "~/app/context/RouteContext";
+import Swal from "sweetalert2";
+import TableForCarbon from "../TableForCarbon/TableForCarbon";
 
 interface TopbarForCarbonFormData {
   vessel: string;
@@ -15,12 +18,13 @@ interface TopbarForCarbonFormData {
   departureDate?: Date | null;
   arrivalDate?: Date | null;
   inputType: number;
+  draftLevel?: number | null;
 }
 
 const validationSchema = Yup.object().shape({
   vessel: Yup.string()
     .required("Vessel is required")
-    .oneOf(["Default", "Vessel 1", "Vessel 2", "Vessel 3"], "Select a valid vessel"),
+    .oneOf(["Default", "Belaja", "Prabhu Sakhawat", "Lady J"], "Select a valid vessel"),
   totalTime: Yup.number()
     .nullable()
     .when("inputType", {
@@ -53,9 +57,11 @@ const validationSchema = Yup.object().shape({
       otherwise: (schema) => schema.nullable(),
     }),
   inputType: Yup.number().required(),
+  draftLevel: Yup.number().nullable().min(0, "Draft Level must be greater than or equal to 0"),
 });
 
 const TopbarForCarbon = () => {
+  const [combinedContent, setCombinedContent] = useState(null);
   const { handleSubmit, control, watch, reset, setValue } = useForm<TopbarForCarbonFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -65,19 +71,30 @@ const TopbarForCarbon = () => {
       departureDate: null,
       arrivalDate: null,
       vessel: "",
+      draftLevel: null,
     },
   });
 
+  const { globalRouteData } = useRouteContext();
   const [selectedOption, setSelectedOption] = React.useState<string>("");
+  const [totalDistance, setTotalDistance] = useState<number | null>(null);
 
   const inputType = watch("inputType");
   const vessel = watch("vessel");
-  const vessels = ["Default", "Vessel 1", "Vessel 2", "Vessel 3"];
+  const vessels = ["Default", "Belaja", "Prabhu Sakhawat", "Lady J"];
   const totalTimeOptions = ["None", "Departure date", "Arrival Date"];
   const avgSpeedOptions = ["None", "Departure date", "Arrival Date"];
   const exactDatesOptions = ["Starting & Arrival Dates"];
   const autoCompleteOptions =
     inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
+
+  useEffect(() => {
+    if (globalRouteData && globalRouteData.length > 0) {
+      const lastIndex = globalRouteData.length - 1;
+      const lastCumulativeDist = parseFloat(globalRouteData[lastIndex].cumulative_dist);
+      setTotalDistance(lastCumulativeDist);
+    }
+  }, [globalRouteData]);
 
   useEffect(() => {
     setValue("totalTime", null);
@@ -100,27 +117,37 @@ const TopbarForCarbon = () => {
       departureDate: null,
       arrivalDate: null,
       inputType: 0,
+      draftLevel: null,
     });
     setSelectedOption("");
   };
 
   const onSubmit = (data: TopbarForCarbonFormData) => {
+    if (!totalDistance) {
+      // If totalDistance doesn't exist, show a warning alert
+      Swal.fire({
+        icon: "warning",
+        title: "Route not selected",
+        text: "Please choose a route first!",
+        confirmButtonText: "OK",
+      });
+      return; // Prevent form submission
+    }
     const submissionData = {
       ...data,
       departureDate:
         selectedOption === "Departure date" || selectedOption === exactDatesOptions[0] ? data.departureDate : null,
       arrivalDate:
         selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
+      totalDistance,
     };
 
     console.log("Submitting data:", submissionData);
-
-    // Axios POST request to send the data to the backend
     axios
-      .post("/api/calculate-stats", submissionData)
+      .post("/api/carbon/calculate-stats", submissionData)
       .then((response) => {
-        console.log("Backend response:", response.data);
-        // Handle the response from the backend here
+        const { combinedContent } = response.data;
+        setCombinedContent(combinedContent);
       })
       .catch((error) => {
         console.error("Error submitting data:", error);
@@ -128,147 +155,166 @@ const TopbarForCarbon = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={styles.topbarForCarbon}>
-      <div className={styles.vesselContainer}>
-        <label>Vessels:</label>
-        <div className={styles.fullWidthAutoComplete}>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.topbarForCarbon}>
+        <div className={styles.vesselContainer}>
+          <label>Vessel:</label>
+          <div className={styles.fullWidthAutoComplete}>
+            <Controller
+              name="vessel"
+              control={control}
+              render={({ field }) => (
+                <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} required />
+              )}
+            />
+          </div>
+          <label>Draft:</label>
           <Controller
-            name="vessel"
-            control={control}
-            render={({ field }) => (
-              <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} required />
-            )}
-          />
-        </div>
-      </div>
-
-      <div className={styles.sliderInputContainer}>
-        <div className={styles.buttonGroup}>
-          <div
-            className={`${styles.buttonSlider} ${
-              inputType === 1 ? styles.middle : inputType === 2 ? styles.right : ""
-            }`}
-          />
-          <div
-            className={inputType === 0 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
-            onClick={() => setValue("inputType", 0)}
-          >
-            Total Time
-          </div>
-          <div
-            className={inputType === 1 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
-            onClick={() => setValue("inputType", 1)}
-          >
-            Avg Speed
-          </div>
-          <div
-            className={inputType === 2 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
-            onClick={() => setValue("inputType", 2)}
-          >
-            Exact Dates
-          </div>
-        </div>
-
-        {inputType === 0 && (
-          <Controller
-            name="totalTime"
+            name="draftLevel"
             control={control}
             render={({ field }) => (
               <input
                 {...field}
                 type="number"
-                placeholder="Days"
-                className={`${styles.input} ${styles.inputMargin}`}
-                value={field.value ?? ""}
-              />
-            )}
-          />
-        )}
-
-        {inputType === 1 && (
-          <Controller
-            name="averageSpeed"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                placeholder="nm/h"
+                placeholder="meters"
                 className={`${styles.input} ${styles.inputMargin}`}
                 value={field.value ?? ""}
                 min="0"
               />
             )}
           />
-        )}
+          <div></div>
+        </div>
 
-        <select
-          className={`${styles.select} ${selectedOption === "" ? styles.placeholderSelected : ""}`}
-          value={selectedOption}
-          onChange={(e) => setSelectedOption(e.target.value)}
-        >
-          <option value="" disabled hidden className={styles.placeholderOption}>
-            Departure/Arrival
-          </option>
-          {autoCompleteOptions.map((option) => (
-            <option key={option} value={option} className={styles.normalOption}>
-              {option}
+        <div className={styles.sliderInputContainer}>
+          <div className={styles.buttonGroup}>
+            <div
+              className={`${styles.buttonSlider} ${
+                inputType === 1 ? styles.middle : inputType === 2 ? styles.right : ""
+              }`}
+            />
+            <div
+              className={inputType === 0 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+              onClick={() => setValue("inputType", 0)}
+            >
+              Total Time
+            </div>
+            <div
+              className={inputType === 1 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+              onClick={() => setValue("inputType", 1)}
+            >
+              Avg Speed
+            </div>
+            <div
+              className={inputType === 2 ? `${styles.toggleButton} ${styles.active}` : styles.toggleButton}
+              onClick={() => setValue("inputType", 2)}
+            >
+              Exact Dates
+            </div>
+          </div>
+
+          {inputType === 0 && (
+            <Controller
+              name="totalTime"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="number"
+                  placeholder="Days"
+                  className={`${styles.input} ${styles.inputMargin}`}
+                  value={field.value ?? ""}
+                />
+              )}
+            />
+          )}
+
+          {inputType === 1 && (
+            <Controller
+              name="averageSpeed"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="number"
+                  placeholder="nm/h"
+                  className={`${styles.input} ${styles.inputMargin}`}
+                  value={field.value ?? ""}
+                  min="0"
+                />
+              )}
+            />
+          )}
+
+          <select
+            className={`${styles.select} ${selectedOption === "" ? styles.placeholderSelected : ""}`}
+            value={selectedOption}
+            onChange={(e) => setSelectedOption(e.target.value)}
+          >
+            <option value="" disabled hidden className={styles.placeholderOption}>
+              Departure/Arrival
             </option>
-          ))}
-        </select>
-      </div>
-
-      {((inputType === 0 || inputType === 1) && selectedOption === "Departure date") ||
-      (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
-        <div className={styles.formGroup}>
-          <label>Departure date</label>
-          <Controller
-            name="departureDate"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="datetime-local"
-                placeholder="Departure date and Time"
-                value={field.value ? field.value.toISOString().slice(0, 16) : ""}
-                onChange={(e) => field.onChange(new Date(e.target.value))}
-                className={styles.input}
-              />
-            )}
-          />
+            {autoCompleteOptions.map((option) => (
+              <option key={option} value={option} className={styles.normalOption}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
-      ) : null}
 
-      {((inputType === 0 || inputType === 1) && selectedOption === "Arrival Date") ||
-      (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
-        <div className={styles.formGroup}>
-          <label>Arrival Date</label>
-          <Controller
-            name="arrivalDate"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="datetime-local"
-                placeholder="Arrival Date and Time"
-                value={field.value ? field.value.toISOString().slice(0, 16) : ""}
-                onChange={(e) => field.onChange(new Date(e.target.value))}
-                className={styles.input}
-              />
-            )}
-          />
+        {((inputType === 0 || inputType === 1) && selectedOption === "Departure date") ||
+        (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
+          <div className={styles.formGroup}>
+            <label>Departure date</label>
+            <Controller
+              name="departureDate"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="datetime-local"
+                  placeholder="Departure date and Time"
+                  value={field.value ? field.value.toISOString().slice(0, 16) : ""}
+                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                  className={styles.input}
+                />
+              )}
+            />
+          </div>
+        ) : null}
+
+        {((inputType === 0 || inputType === 1) && selectedOption === "Arrival Date") ||
+        (inputType === 2 && selectedOption === exactDatesOptions[0]) ? (
+          <div className={styles.formGroup}>
+            <label>Arrival Date</label>
+            <Controller
+              name="arrivalDate"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="datetime-local"
+                  placeholder="Arrival Date and Time"
+                  value={field.value ? field.value.toISOString().slice(0, 16) : ""}
+                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                  className={styles.input}
+                />
+              )}
+            />
+          </div>
+        ) : null}
+
+        <div className={styles.buttonContainer}>
+          <button type="button" onClick={handleReset} className={`${styles.button} ${styles.buttonReset}`}>
+            Reset
+          </button>
+          <button type="submit" className={`${styles.button} ${styles.buttonCalculate}`}>
+            Calculate
+          </button>
         </div>
-      ) : null}
-
-      <div className={styles.buttonContainer}>
-        <button type="button" onClick={handleReset} className={`${styles.button} ${styles.buttonReset}`}>
-          Reset
-        </button>
-        <button type="submit" className={`${styles.button} ${styles.buttonCalculate}`}>
-          Calculate
-        </button>
-      </div>
-    </form>
+      </form>
+      {combinedContent && <TableForCarbon combinedContent={combinedContent} />}
+    </>
   );
 };
 
