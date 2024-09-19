@@ -19,10 +19,6 @@
   background-color: #fff;
 }
 
-.input.invalid {
-  border-color: #dc3545;
-}
-
 .options {
   position: absolute;
   width: 100%;

@@ -100,8 +100,6 @@ const Topbar = () => {
                     control={control as Control<TopBarFormData>}
                     placeholder="Origin Port"
                     options={portOptions}
-                    required
-                    error={!!errors.originPort}
                   />
                 )}
               />
@@ -125,8 +123,6 @@ const Topbar = () => {
                     control={control as Control<TopBarFormData>}
                     placeholder="Destination Port"
                     options={portOptions}
-                    required
-                    error={!!errors.destinationPort}
                   />
                 )}
               />
@@ -152,7 +148,6 @@ const Topbar = () => {
                     control={control as Control<TopBarFormData>}
                     placeholder="Middle Point 1"
                     options={middlePointOptions}
-                    error={!!errors.middlePoint1}
                   />
                 )}
               />
@@ -176,7 +171,6 @@ const Topbar = () => {
                     control={control as Control<TopBarFormData>}
                     placeholder="Middle Point 2"
                     options={middlePointOptions}
-                    error={!!errors.middlePoint2}
                   />
                 )}
               />

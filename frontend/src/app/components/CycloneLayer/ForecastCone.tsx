@@ -3,8 +3,14 @@ import { GeoJSON } from "react-leaflet";
 import axios from "axios";
 import { Feature, FeatureCollection, GeoJsonObject } from "geojson";
 
+interface CycloneLoadData {
+  original: CycloneData | null;
+  minus360: CycloneData | null;
+  plus360: CycloneData | null;
+}
+
 interface ForecastConeProps {
-  onDataLoad?: (data: any) => void;
+  onDataLoad?: (data: CycloneLoadData) => void;
 }
 
 type CycloneData = FeatureCollection;
@@ -94,7 +100,15 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
     return () => {
       isMounted = false;
     };
-  });
+  }, []);
+
+  const bindPopup = (feature: Feature, layer: any) => {
+    if (feature.properties && feature.properties.STORMNAME) {
+      layer.bindPopup(
+        `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
+      );
+    }
+  };
 
   if (!cycloneData) return null;
 
@@ -105,17 +119,10 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
         style={() => ({
           color: "red",
           weight: 2,
-          opacity: 0.8,
+          opacity: 0.5,
         })}
-        onEachFeature={(feature: Feature, layer) => {
-          if (feature.properties && feature.properties.STORMNAME) {
-            layer.bindPopup(
-              `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
-            );
-          }
-        }}
+        onEachFeature={bindPopup}
       />
-
       <GeoJSON
         data={cycloneData.minus360 as GeoJsonObject}
         style={() => ({
@@ -123,15 +130,8 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
           weight: 2,
           opacity: 0.5,
         })}
-        onEachFeature={(feature: Feature, layer) => {
-          if (feature.properties && feature.properties.STORMNAME) {
-            layer.bindPopup(
-              `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
-            );
-          }
-        }}
+        onEachFeature={bindPopup}
       />
-
       <GeoJSON
         data={cycloneData.plus360 as GeoJsonObject}
         style={() => ({
@@ -139,13 +139,7 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
           weight: 2,
           opacity: 0.5,
         })}
-        onEachFeature={(feature: Feature, layer) => {
-          if (feature.properties && feature.properties.STORMNAME) {
-            layer.bindPopup(
-              `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
-            );
-          }
-        }}
+        onEachFeature={bindPopup}
       />
     </>
   );

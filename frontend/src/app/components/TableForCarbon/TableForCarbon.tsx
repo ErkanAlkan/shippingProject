@@ -1,99 +1,67 @@
 import React from "react";
 import styles from "./TableForCarbon.module.css";
-import { totalmem } from "os";
-import { UNABLE_TO_FIND_POSTINSTALL_TRIGGER_JSON_SCHEMA_ERROR } from "@prisma/client/scripts/postinstall.js";
 
 interface TableProps {
   combinedContent: {
-    arrivalDate: string | null;
-    averageSpeed: number;
-    calculatedEmission: number;
-    calculatedPower: number;
-    departureDate: string | null;
-    secondaryPower: number;
-    totalDistance: number;
+    speed: number;
     totalTime: number;
-  };
+    totalDistance: number;
+    calculatedPower: number;
+    secondaryPower: number;
+    calculatedEmission: number;
+    arrivalDate: string | null;
+    departureDate: string | null;
+  }[];
 }
 
 const formatDate = (dateString: string | null) => {
   if (!dateString) return "N/A";
-
-  const userLocale = navigator.language || "en-US"; // Use user's locale
+  const userLocale = navigator.language || "en-US";
   const date = new Date(dateString);
-
   const formattedDate = new Intl.DateTimeFormat(userLocale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(date);
-
   const formattedTime = new Intl.DateTimeFormat(userLocale, {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false, // Set this to true if you want a 12-hour format with AM/PM
+    hour12: false,
   }).format(date);
-
-  return `${formattedDate}\n${formattedTime}`; // Combine date and time with a line break
+  return `${formattedDate} ${formattedTime}`;
 };
 
 const TableForCarbon: React.FC<TableProps> = ({ combinedContent }) => {
   return (
     <div className={styles.tableForCarbon}>
       <div className={styles.tableContainer}>
-        {combinedContent ? (
+        {combinedContent && combinedContent.length > 0 ? (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>
-                  Speed
-                  <br />
-                  (knot)
-                </th>
-                <th>
-                  Time
-                  <br />
-                  (days)
-                </th>
-                <th>
-                  Distance
-                  <br />
-                  (nm)
-                </th>
-                <th>
-                  Fuel
-                  <br />
-                  (tons)
-                </th>
-                <th>
-                  Fuel II
-                  <br />
-                  (tons)
-                </th>
-                <th>
-                  CO2
-                  <br />
-                  (tons)
-                </th>
-                <th>
-                  Arrival
-                </th>
-                <th>
-                  Departure
-                </th>
+                <th>Speed (knot)</th>
+                <th>Time (days)</th>
+                <th>Distance (nm)</th>
+                <th>Fuel (tons)</th>
+                <th>Fuel II (tons)</th>
+                <th>CO2 (tons)</th>
+                <th>Arrival</th>
+                <th>Departure</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>{combinedContent.averageSpeed}</td>
-                <td>{combinedContent.totalTime}</td>
-                <td>{combinedContent.totalDistance}</td>
-                <td>{combinedContent.calculatedPower}</td>
-                <td>{combinedContent.secondaryPower}</td>
-                <td>{combinedContent.calculatedEmission}</td>
-                <td>{formatDate(combinedContent.departureDate)}</td>
-                <td>{formatDate(combinedContent.arrivalDate)}</td>
-              </tr>
+              {combinedContent.map((row, index) => (
+                <tr key={index}>
+                  <td>{row.speed}</td>
+                  <td>{row.totalTime}</td>
+                  <td>{row.totalDistance}</td>
+                  <td>{row.calculatedPower}</td>
+                  <td>{row.secondaryPower}</td>
+                  <td>{row.calculatedEmission}</td>
+                  <td>{formatDate(row.arrivalDate)}</td>
+                  <td>{formatDate(row.departureDate)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         ) : (

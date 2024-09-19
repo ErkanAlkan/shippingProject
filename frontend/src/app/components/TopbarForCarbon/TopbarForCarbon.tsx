@@ -24,7 +24,7 @@ interface TopbarForCarbonFormData {
 const validationSchema = Yup.object().shape({
   vessel: Yup.string()
     .required("Vessel is required")
-    .oneOf(["Default", "Belaja", "Prabhu Sakhawat", "Lady J"], "Select a valid vessel"),
+    .oneOf(["Belaja", "Prabhu Sakhawat", "Lady J"], "Select a valid vessel"),
   totalTime: Yup.number()
     .nullable()
     .when("inputType", {
@@ -81,7 +81,7 @@ const TopbarForCarbon = () => {
 
   const inputType = watch("inputType");
   const vessel = watch("vessel");
-  const vessels = ["Default", "Belaja", "Prabhu Sakhawat", "Lady J"];
+  const vessels = ["Belaja", "Prabhu Sakhawat", "Lady J"];
   const totalTimeOptions = ["None", "Departure date", "Arrival Date"];
   const avgSpeedOptions = ["None", "Departure date", "Arrival Date"];
   const exactDatesOptions = ["Starting & Arrival Dates"];
@@ -124,14 +124,13 @@ const TopbarForCarbon = () => {
 
   const onSubmit = (data: TopbarForCarbonFormData) => {
     if (!totalDistance) {
-      // If totalDistance doesn't exist, show a warning alert
       Swal.fire({
         icon: "warning",
         title: "Route not selected",
         text: "Please choose a route first!",
         confirmButtonText: "OK",
       });
-      return; // Prevent form submission
+      return;
     }
     const submissionData = {
       ...data,
@@ -164,7 +163,7 @@ const TopbarForCarbon = () => {
               name="vessel"
               control={control}
               render={({ field }) => (
-                <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} required />
+                <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} />
               )}
             />
           </div>
@@ -180,6 +179,7 @@ const TopbarForCarbon = () => {
                 className={`${styles.input} ${styles.inputMargin}`}
                 value={field.value ?? ""}
                 min="0"
+                step="0.01"
               />
             )}
           />

@@ -2,20 +2,13 @@
 
 import express from "express";
 import {
-  calculateWettedHullExponent,
-  calculateSpeedExponent,
-  powerRequired,
-  powerRequiredModified,
-  carbonEmission,
-  findClosestSpeeds,
   vesselStats,
   calculateSpeed,
   calculateTime,
   calculateTimeDifference,
-  emissionFactors,
   VesselVariable,
+  getEmissionsAndPowerForSpeed,
 } from "./Calculations/Calculations";
-import { table } from "console";
 const router = express.Router();
 
 const app = express();
@@ -71,15 +64,12 @@ router.post("/calculate-stats", async (req, res) => {
 
     const stats = await vesselStats(vessel, 1, 10);
     const vesselLength = stats.length_of_vessel;
-    console.log("router.post ~ vesselLength:", vesselLength);
-    console.log("router.post ~ vesselLength:", typeof vesselLength);
     const vesselWidth = stats.beam_of_vessel;
     const maxDraftLevel = stats.max_draft_level;
     let wettedHullExponent;
     let speedExponent;
 
     let tableContent1;
-    let tableContent2;
 
     if (inputType === 0) {
       tableContent1 = calculateSpeed(totalTime, totalDistance, departureDate, arrivalDate);
@@ -88,169 +78,149 @@ router.post("/calculate-stats", async (req, res) => {
     } else if (inputType === 2) {
       tableContent1 = calculateTimeDifference(totalDistance, departureDate, arrivalDate);
     }
+
     if (tableContent1) {
       tableContent1.totalTime = Math.round(tableContent1.totalTime * 10) / 10;
       tableContent1.averageSpeed = Math.round(tableContent1.averageSpeed * 100) / 100;
       tableContent1.totalDistance = Math.round(tableContent1.totalDistance);
       totalTime = tableContent1.totalTime;
-    }
-    console.log("router.post ~ tableContent1:", tableContent1);
-    const clientSpeed = tableContent1?.averageSpeed;
+      const clientSpeed = tableContent1?.averageSpeed;
+      arrivalDate = null;
+      departureDate = null;
 
-    const { totalLadenAndBalast, ballastCount, ladenCount } = countLadenOrBallast(stats);
+      const { totalLadenAndBalast, ballastCount, ladenCount } = countLadenOrBallast(stats);
 
-    const calculateEmissionsAndPower = (
-      vesselVariables: VesselVariable[],
-      clientSpeed: number,
-      state: "Laden" | "Ballast",
-      draftLevel: number,
-      vesselLength: number,
-      vesselWidth: number,
-      maxDraftLevel: number,
-      stats: any
-    ) => {
-      const { closest, secondClosest } = findClosestSpeeds(vesselVariables, clientSpeed, state);
+      const tableContent2 = getEmissionsAndPowerForSpeed(
+        stats,
+        clientSpeed,
+        draftLevel,
+        vesselLength,
+        vesselWidth,
+        maxDraftLevel,
+        totalLadenAndBalast,
+        ladenCount,
+        ballastCount,
+        totalTime
+      );
 
-      const closestSpeed = closest?.speed?.current_vessel_speed ?? null;
-      const closestFuelUsage1 = closest?.fuel_usage_main_1 ?? null;
-      console.log("router.post ~ closestFuelUsage1First:", closestFuelUsage1);
-      console.log("router.post ~ closestFuelUsage1First:", typeof closestFuelUsage1);
-      let closestFuelUsage1Type = closest?.fuel_usage_main_1_type ?? null;
-      const closestFuelUsage2 = closest?.fuel_usage_main_2 ?? null;
+      const speedPlus1 = tableContent1?.averageSpeed + 1;
+      const speedPlus2 = tableContent1?.averageSpeed + 2;
+      const speedMinus1 = tableContent1?.averageSpeed - 1;
+      const speedMinus2 = tableContent1?.averageSpeed - 2;
 
-      let closestFuelUsage2Type = closest?.fuel_usage_main_2_type ?? null;
+      let tableContent1SpeedPlus1 = calculateTime(speedPlus1, totalDistance, departureDate, arrivalDate);
+      tableContent1SpeedPlus1.totalTime = Math.round(tableContent1SpeedPlus1.totalTime * 10) / 10;
+      tableContent1SpeedPlus1.averageSpeed = Math.round(tableContent1SpeedPlus1.averageSpeed * 100) / 100;
+      tableContent1SpeedPlus1.totalDistance = Math.round(tableContent1SpeedPlus1.totalDistance);
 
-      const secondClosestSpeed = secondClosest?.speed?.current_vessel_speed ?? null;
-      const secondClosestFuelUsage1 = secondClosest?.fuel_usage_main_1 ?? null;
-      let secondClosestFuelUsage1Type = secondClosest?.fuel_usage_main_1_type ?? null;
-      const secondClosestFuelUsage2 = secondClosest?.fuel_usage_main_2 ?? null;
-      let secondClosestFuelUsage2Type = secondClosest?.fuel_usage_main_2_type ?? null;
+      let tableContent1SpeedPlus2 = calculateTime(speedPlus2, totalDistance, departureDate, arrivalDate);
+      tableContent1SpeedPlus2.totalTime = Math.round(tableContent1SpeedPlus2.totalTime * 10) / 10;
+      tableContent1SpeedPlus2.averageSpeed = Math.round(tableContent1SpeedPlus2.averageSpeed * 100) / 100;
+      tableContent1SpeedPlus2.totalDistance = Math.round(tableContent1SpeedPlus2.totalDistance);
 
-      const wettedHullExponent = calculateWettedHullExponent(vesselLength, vesselWidth, draftLevel, maxDraftLevel);
+      let tableContent1SpeedMinus1 = calculateTime(speedMinus1, totalDistance, departureDate, arrivalDate);
+      tableContent1SpeedMinus1.totalTime = Math.round(tableContent1SpeedMinus1.totalTime * 10) / 10;
+      tableContent1SpeedMinus1.averageSpeed = Math.round(tableContent1SpeedMinus1.averageSpeed * 100) / 100;
+      tableContent1SpeedMinus1.totalDistance = Math.round(tableContent1SpeedMinus1.totalDistance);
 
-      if (
-        closestSpeed !== null &&
-        closestFuelUsage1 !== null &&
-        secondClosestSpeed !== null &&
-        secondClosestFuelUsage1 !== null
-      ) {
-        const speedExponent = calculateSpeedExponent(
-          closestSpeed as number,
-          secondClosestSpeed as number,
-          closestFuelUsage1 as number,
-          secondClosestFuelUsage1 as number
-        );
+      let tableContent1SpeedMinus2 = calculateTime(speedMinus2, totalDistance, departureDate, arrivalDate);
+      tableContent1SpeedMinus2.totalTime = Math.round(tableContent1SpeedMinus2.totalTime * 10) / 10;
+      tableContent1SpeedMinus2.averageSpeed = Math.round(tableContent1SpeedMinus2.averageSpeed * 100) / 100;
+      tableContent1SpeedMinus2.totalDistance = Math.round(tableContent1SpeedMinus2.totalDistance);
 
-        let lightShipWeight;
-        const maxVesselWeight = stats.tonnage_per_centimeter * stats.max_draft_level * 100;
+      totalTime = tableContent1SpeedPlus1.totalTime;
+      const tableContent2SpeedPlus1 = getEmissionsAndPowerForSpeed(
+        stats,
+        speedPlus1,
+        draftLevel,
+        vesselLength,
+        vesselWidth,
+        maxDraftLevel,
+        totalLadenAndBalast,
+        ladenCount,
+        ballastCount,
+        totalTime
+      );
+      totalTime = tableContent1SpeedPlus2.totalTime;
+      const tableContent2SpeedPlus2 = getEmissionsAndPowerForSpeed(
+        stats,
+        speedPlus2,
+        draftLevel,
+        vesselLength,
+        vesselWidth,
+        maxDraftLevel,
+        totalLadenAndBalast,
+        ladenCount,
+        ballastCount,
+        totalTime
+      );
+      totalTime = tableContent1SpeedMinus1.totalTime;
+      const tableContent2SpeedMinus1 = getEmissionsAndPowerForSpeed(
+        stats,
+        speedMinus1,
+        draftLevel,
+        vesselLength,
+        vesselWidth,
+        maxDraftLevel,
+        totalLadenAndBalast,
+        ladenCount,
+        ballastCount,
+        totalTime
+      );
 
-        if (stats.light_ship_weight) {
-          lightShipWeight = stats.light_ship_weight;
-        } else if (stats.tonnage_per_centimeter && stats.max_draft_level && stats.deadweight) {
-          lightShipWeight = maxVesselWeight - stats.deadweight;
-        }
+      totalTime = tableContent1SpeedMinus2.totalTime;
+      const tableContent2SpeedMinus2 = getEmissionsAndPowerForSpeed(
+        stats,
+        speedMinus2,
+        draftLevel,
+        vesselLength,
+        vesselWidth,
+        maxDraftLevel,
+        totalLadenAndBalast,
+        ladenCount,
+        ballastCount,
+        totalTime
+      );
 
-        const currentVesselWeight = stats.tonnage_per_centimeter * draftLevel * 100;
-        const mainCalculatedPower = powerRequiredModified(
-          closestSpeed,
-          closestFuelUsage1,
-          clientSpeed,
-          maxVesselWeight,
-          currentVesselWeight,
-          wettedHullExponent,
-          speedExponent
-        );
-
-        let calculatedPower = mainCalculatedPower * totalTime;
-        let calculatedEmission = 0;
-        let secondaryPower = 0;
-
-        if (closestFuelUsage1Type) {
-          closestFuelUsage1Type = closestFuelUsage1Type.toLowerCase();
-          calculatedEmission = carbonEmission(closestFuelUsage1Type, calculatedPower);
-          console.log("router.post ~ calculatedEmission:", calculatedEmission);
-        }
-
-        if (closestFuelUsage2 && closestFuelUsage2Type) {
-          secondaryPower += Number(closestFuelUsage2 * totalTime);
-          closestFuelUsage2Type = closestFuelUsage2Type.toLowerCase();
-          const secondaryFuelEmission = carbonEmission(closestFuelUsage2Type, closestFuelUsage2);
-          console.log("router.post ~ secondaryFuelEmission:", secondaryFuelEmission);
-          calculatedEmission += secondaryFuelEmission;
-        }
-        return {
-          calculatedPower: Math.round(calculatedPower * 100) / 100,
-          calculatedEmission: Math.round(calculatedEmission * 100) / 100,
-          secondaryPower: Math.round(secondaryPower * 100) / 100,
-        };
-      }
-
-      return {
-        calculatedPower: 0,
-        calculatedEmission: 0,
-        secondaryPower: 0,
+      const combinedContent = [
+        {
+          speed: speedMinus2,
+          ...tableContent1SpeedMinus2,
+          ...tableContent2SpeedMinus2,
+        },
+          
+        {
+          speed: speedMinus1,
+          ...tableContent1SpeedMinus1,
+          ...tableContent2SpeedMinus1,
+        },
+          
+        {
+          speed: tableContent1.averageSpeed,
+          ...tableContent1,
+          ...tableContent2,
+        },
+          
+        {
+          speed: speedPlus1,
+          ...tableContent1SpeedPlus1,
+          ...tableContent2SpeedPlus1,
+        },
+          
+        {
+          speed: speedPlus2,
+          ...tableContent1SpeedPlus2,
+          ...tableContent2SpeedPlus2,
+        },
+          
+      ];
+      const result = {
+        message: "Data processed successfully",
+        combinedContent,
       };
-    };
 
-    if (totalLadenAndBalast > 1) {
-      const draftPerCent = (draftLevel / maxDraftLevel) * 100;
-
-      if (draftPerCent >= 75 && ladenCount > 1 && clientSpeed) {
-        tableContent2 = calculateEmissionsAndPower(
-          stats.vesselVariables,
-          clientSpeed,
-          "Laden",
-          draftLevel,
-          vesselLength,
-          vesselWidth,
-          maxDraftLevel,
-          stats
-        );
-      } else if (draftPerCent < 75 && ballastCount > 1 && clientSpeed) {
-        tableContent2 = calculateEmissionsAndPower(
-          stats.vesselVariables,
-          clientSpeed,
-          "Ballast",
-          draftLevel,
-          vesselLength,
-          vesselWidth,
-          maxDraftLevel,
-          stats
-        );
-      } else if (ladenCount > 1 && clientSpeed) {
-        tableContent2 = calculateEmissionsAndPower(
-          stats.vesselVariables,
-          clientSpeed,
-          "Laden",
-          draftLevel,
-          vesselLength,
-          vesselWidth,
-          maxDraftLevel,
-          stats
-        );
-      } else if (ballastCount > 1 && clientSpeed) {
-        tableContent2 = calculateEmissionsAndPower(
-          stats.vesselVariables,
-          clientSpeed,
-          "Ballast",
-          draftLevel,
-          vesselLength,
-          vesselWidth,
-          maxDraftLevel,
-          stats
-        );
-      }
+      return res.status(200).json(result);
     }
-    const combinedContent = {
-      ...tableContent1,
-      ...tableContent2,
-    };
-    const result = {
-      message: "Data processed successfully",
-      combinedContent,
-    };
-
-    return res.status(200).json(result);
   } catch (error) {
     console.error("Error processing the request:", error);
     return res.status(500).json({ message: "Internal server error" });
