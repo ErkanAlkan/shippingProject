@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { LatLngTuple, LatLngBounds, icon } from "leaflet";
 import { useMap } from "react-leaflet";
@@ -18,8 +18,6 @@ import ForecastTrackLayer from "../CycloneLayer/ForecastTrack";
 
 import { checkIntersectionBetweenLineAndPolygon } from "~/utils/CheckIntersectionBetweenLineAndPolygon";
 import { checkIntersectionBetweenLines } from "~/utils/CheckInterSectionBetweenLines";
-
-
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
@@ -193,6 +191,24 @@ const Map: React.FC = () => {
     }
   }, [globalRouteData, forecastConeData, observedTrackData]);
 
+  const handleForecastConeDataLoad = useCallback(
+    (data: any) => {
+      if (JSON.stringify(forecastConeData) !== JSON.stringify(data)) {
+        setForecastConeData(data);
+      }
+    },
+    [forecastConeData]
+  );
+
+  const handleObservedTrackDataLoad = useCallback(
+    (data: any) => {
+      if (JSON.stringify(observedTrackData) !== JSON.stringify(data)) {
+        setObservedTrackData(data);
+      }
+    },
+    [observedTrackData]
+  );
+
   const handleDateLineCrossing = (prev: LatLngTuple | undefined, current: LatLngTuple): LatLngTuple => {
     if (!prev) return current;
 
@@ -215,8 +231,6 @@ const Map: React.FC = () => {
     return [sumLat / totalPoints, sumLon / totalPoints];
   };
 
-  const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 540]);
-
   const handlePopupOpen = (index: number) => {
     if (index === 0) {
       setIsOriginPopupOpen(true);
@@ -232,6 +246,8 @@ const Map: React.FC = () => {
       setIsDestinationPopupOpen(false);
     }
   };
+  
+  const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 540]);
 
   return (
     <MapContainer
@@ -248,20 +264,8 @@ const Map: React.FC = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <ForecastConeLayer
-        onDataLoad={(data: any) => {
-          if (JSON.stringify(forecastConeData) !== JSON.stringify(data)) {
-            setForecastConeData(data);
-          }
-        }}
-      />
-      <ObservedTrackLayer
-        onDataLoad={(data: any) => {
-          if (JSON.stringify(observedTrackData) !== JSON.stringify(data)) {
-            setObservedTrackData(data);
-          }
-        }}
-      />
+      <ForecastConeLayer onDataLoad={handleForecastConeDataLoad} />
+      <ObservedTrackLayer onDataLoad={handleObservedTrackDataLoad} />
       <ForecastTrackLayer />
       {adjustedCoordinates.map((position, index) => (
         <Marker

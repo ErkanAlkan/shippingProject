@@ -43,28 +43,6 @@ export const checkIntersectionBetweenLineAndPolygon = (routeData: LatLngTuple[],
       console.log("no intersection between line and polygon");
     }
   }
-  // const routeLine = turf.lineString(swappedRouteData);
-  // const intersection = turf.lineIntersect(routeLine, forecastPolygon);
-  // const booleanIntersection = turf.booleanIntersects(routeLine,forecastPolygon);
-  // console.log("checkIntersectionBetweenLineAndPolygon ~ booleanIntersection:", booleanIntersection);
-
-  // if (intersection.features.length > 0) {
-  //   if (intersection.features.length === 1) {
-  //     let theIntersection = intersection.features[0].geometry.coordinates as [number, number];
-  //     theIntersection = swapSingleCoordinate(theIntersection);
-  //     console.log("checkIntersectionBetweenLineAndPolygon ~ theIntersection:", theIntersection);
-  //     return theIntersection;
-  //   }
-
-  //   const lineOrArea = turf.lineString(intersection.features.map((f) => f.geometry.coordinates));
-  //   console.log("checkIntersectionBetweenLineAndPolygon ~ lineOrArea:", lineOrArea);
-  //   const centroid = turf.centroid(lineOrArea);
-  //   let theCoordinates = centroid.geometry.coordinates as [number, number];
-  //   console.log("checkIntersectionBetweenLineAndPolygon ~ theCoordinates:", theCoordinates);
-  //   theCoordinates = swapSingleCoordinate(theCoordinates);
-
-  //   return theCoordinates;
-  // }
 
   return null;
 };

@@ -45,7 +45,7 @@ const validationSchema = Yup.object().shape({
     .nullable()
     .when("inputType", {
       is: (value: number) => value === 2,
-      then: (schema) => schema.required("Starting Date is required"),
+      then: (schema) => schema.required("Departure Date is required"),
       otherwise: (schema) => schema.nullable(),
     }),
   arrivalDate: Yup.date()
@@ -57,7 +57,7 @@ const validationSchema = Yup.object().shape({
       otherwise: (schema) => schema.nullable(),
     }),
   inputType: Yup.number().required(),
-  draftLevel: Yup.number().nullable().min(0, "Draft Level must be greater than or equal to 0"),
+  draftLevel: Yup.number().nullable().min(1, "Draft Level must be greater than or equal to 1"),
 });
 
 const TopbarForCarbon = () => {
@@ -84,7 +84,7 @@ const TopbarForCarbon = () => {
   const vessels = ["Belaja", "Prabhu Sakhawat", "Lady J"];
   const totalTimeOptions = ["None", "Departure date", "Arrival Date"];
   const avgSpeedOptions = ["None", "Departure date", "Arrival Date"];
-  const exactDatesOptions = ["Starting & Arrival Dates"];
+  const exactDatesOptions = ["Departure & Arrival Dates"];
   const autoCompleteOptions =
     inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
 
@@ -103,7 +103,7 @@ const TopbarForCarbon = () => {
     setValue("arrivalDate", null);
 
     if (inputType === 2) {
-      setSelectedOption("Starting & Arrival Dates");
+      setSelectedOption("Departure & Arrival Dates");
     } else {
       setSelectedOption("");
     }
@@ -141,7 +141,6 @@ const TopbarForCarbon = () => {
       totalDistance,
     };
 
-    console.log("Submitting data:", submissionData);
     axios
       .post("/api/carbon/calculate-stats", submissionData)
       .then((response) => {
@@ -183,7 +182,6 @@ const TopbarForCarbon = () => {
               />
             )}
           />
-          <div></div>
         </div>
 
         <div className={styles.sliderInputContainer}>
@@ -237,7 +235,7 @@ const TopbarForCarbon = () => {
                 <input
                   {...field}
                   type="number"
-                  placeholder="nm/h"
+                  placeholder="knot"
                   className={`${styles.input} ${styles.inputMargin}`}
                   value={field.value ?? ""}
                   min="0"

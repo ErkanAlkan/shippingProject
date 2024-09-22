@@ -29,6 +29,26 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
     return shiftedData;
   }, []);
 
+  const bindPopup = useCallback((feature: any, polyline: L.Polyline) => {
+    const popupContent = `
+      <strong>${feature.properties.STORMNAME}</strong><br/>
+      Storm Type: ${feature.properties.STORMTYPE || "Unknown"}
+    `;
+    polyline.bindPopup(popupContent);
+  },[]);
+
+  const addGeodesicPolylines = useCallback((features: any[], map: L.Map) => {
+    features.forEach((feature: any) => {
+      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]); // LatLng
+      const geodesicPolyline = L.geodesic(coordinates, {
+        weight: 4,
+        color: "red",
+        wrap: false,
+      }).addTo(map);
+      bindPopup(feature, geodesicPolyline);
+    });
+  }, [bindPopup]);
+
   useEffect(() => {
     const fetchObservedTrackData = async () => {
       try {
@@ -63,42 +83,10 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
   useEffect(() => {
     if (!observedTrackData || !map) return;
 
-    observedTrackData.original.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 4,
-        color: "red",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-
-    observedTrackData.minus360.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 4,
-        color: "red",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-
-    observedTrackData.plus360.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 4,
-        color: "red",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-  }, [observedTrackData, map]);
+    addGeodesicPolylines(observedTrackData.original.features, map);
+    addGeodesicPolylines(observedTrackData.minus360.features, map);
+    addGeodesicPolylines(observedTrackData.plus360.features, map);
+  }, [observedTrackData, map, addGeodesicPolylines]);
 
   return null;
 };

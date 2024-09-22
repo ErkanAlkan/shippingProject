@@ -45,8 +45,8 @@ const TableForCarbon: React.FC<TableProps> = ({ combinedContent }) => {
                 <th>Fuel (tons)</th>
                 <th>Fuel II (tons)</th>
                 <th>CO2 (tons)</th>
-                <th>Arrival</th>
                 <th>Departure</th>
+                <th>Arrival</th>
               </tr>
             </thead>
             <tbody>
@@ -58,8 +58,8 @@ const TableForCarbon: React.FC<TableProps> = ({ combinedContent }) => {
                   <td>{row.calculatedPower}</td>
                   <td>{row.secondaryPower}</td>
                   <td>{row.calculatedEmission}</td>
-                  <td>{formatDate(row.arrivalDate)}</td>
                   <td>{formatDate(row.departureDate)}</td>
+                  <td>{formatDate(row.arrivalDate)}</td>
                 </tr>
               ))}
             </tbody>

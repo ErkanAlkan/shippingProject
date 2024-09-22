@@ -84,104 +84,46 @@ const Topbar = () => {
     }
   };
 
+  const renderInput = (name: keyof TopBarFormData, label: string, options: string[]) => {
+    const placeholder = name === "originPort" || name === "destinationPort" ? "Select Port" : "Select Point";
+  
+    return (
+      <div className={styles.inputContainer}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>{label}</label>
+          <div className={styles.inputField}>
+            <Controller
+              name={name}
+              control={control as Control<TopBarFormData>}
+              render={({ field }) => (
+                <AutoComplete
+                  {...field}
+                  control={control as Control<TopBarFormData>}
+                  placeholder={placeholder}
+                  options={options}
+                />
+              )}
+            />
+            {errors[name] && (
+              <span className={styles.error}>{errors[name]?.message}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.topbar}>
       <div className={styles.row}>
-        <div className={styles.inputContainer}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Origin Port</label>
-            <div className={styles.inputField}>
-              <Controller
-                name="originPort"
-                control={control as Control<TopBarFormData>}
-                render={({ field }) => (
-                  <AutoComplete
-                    {...field}
-                    control={control as Control<TopBarFormData>}
-                    placeholder="Origin Port"
-                    options={portOptions}
-                  />
-                )}
-              />
-              {errors.originPort && (
-                <span className={styles.error}>{errors.originPort.message}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.inputContainer}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Destination Port</label>
-            <div className={styles.inputField}>
-              <Controller
-                name="destinationPort"
-                control={control as Control<TopBarFormData>}
-                render={({ field }) => (
-                  <AutoComplete
-                    {...field}
-                    control={control as Control<TopBarFormData>}
-                    placeholder="Destination Port"
-                    options={portOptions}
-                  />
-                )}
-              />
-              {errors.destinationPort && (
-                <span className={styles.error}>{errors.destinationPort.message}</span>
-              )}
-            </div>
-          </div>
-        </div>
+        {renderInput("originPort", "Origin Port", portOptions)}
+        {renderInput("destinationPort", "Destination Port", portOptions)}
       </div>
-
       <div className={styles.row}>
-        <div className={styles.inputContainer}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Middle Point 1</label>
-            <div className={styles.inputField}>
-              <Controller
-                name="middlePoint1"
-                control={control as Control<TopBarFormData>}
-                render={({ field }) => (
-                  <AutoComplete
-                    {...field}
-                    control={control as Control<TopBarFormData>}
-                    placeholder="Middle Point 1"
-                    options={middlePointOptions}
-                  />
-                )}
-              />
-              {errors.middlePoint1 && (
-                <span className={styles.error}>{errors.middlePoint1.message}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.inputContainer}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Middle Point 2</label>
-            <div className={styles.inputField}>
-              <Controller
-                name="middlePoint2"
-                control={control as Control<TopBarFormData>}
-                render={({ field }) => (
-                  <AutoComplete
-                    {...field}
-                    control={control as Control<TopBarFormData>}
-                    placeholder="Middle Point 2"
-                    options={middlePointOptions}
-                  />
-                )}
-              />
-              {errors.middlePoint2 && (
-                <span className={styles.error}>{errors.middlePoint2.message}</span>
-              )}
-            </div>
-          </div>
-        </div>
+        {renderInput("middlePoint1", "Middle Point 1", middlePointOptions)}
+        {renderInput("middlePoint2", "Middle Point 2", middlePointOptions)}
       </div>
-
       <button type="submit" className={styles.submitButton}>
         Run
       </button>

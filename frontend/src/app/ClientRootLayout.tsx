@@ -3,7 +3,7 @@
 import React from "react";
 import styles from "./ClientRootLayout.module.css";
 
-import Sidebar from "~/app/components/Sidebar/Sidebar";
+import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   return (

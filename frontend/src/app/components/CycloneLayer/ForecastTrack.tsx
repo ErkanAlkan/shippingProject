@@ -27,6 +27,27 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
     return shiftedData;
   }, []);
 
+  const bindPopup = useCallback((feature: any, polyline: L.Polyline) => {
+    const popupContent = `
+      <strong>${feature.properties.STORMNAME}</strong><br/>
+      Storm Type: ${feature.properties.STORMTYPE || "Unknown"}
+    `;
+    polyline.bindPopup(popupContent);
+  }, []);
+
+  const addGeodesicPolylines = useCallback((features: any[], map: L.Map) => {
+    features.forEach((feature: any) => {
+      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
+      const geodesicPolyline = L.geodesic(coordinates, {
+        weight: 2,
+        color: "red",
+        dashArray: "5, 5",
+        wrap: false,
+      }).addTo(map);
+      bindPopup(feature, geodesicPolyline);
+    });
+  }, [bindPopup]);
+
   useEffect(() => {
     const fetchForecastTrackData = async () => {
       try {
@@ -36,6 +57,7 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
         const originalData = response.data;
         const shiftedDataMinus360 = shiftCoordinates(originalData, -360);
         const shiftedDataPlus360 = shiftCoordinates(originalData, 360);
+
         setForecastTrackData({
           original: originalData,
           minus360: shiftedDataMinus360,
@@ -52,45 +74,10 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
   useEffect(() => {
     if (!forecastTrackData || !map) return;
 
-    forecastTrackData.original.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 2,
-        color: "red",
-        dashArray: "5, 5",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-
-    forecastTrackData.minus360.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 2,
-        color: "red",
-        dashArray: "5, 5",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-
-    forecastTrackData.plus360.features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 2,
-        color: "red",
-        dashArray: "5, 5",
-        wrap: false,
-      }).addTo(map);
-      geodesicPolyline.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Storm Type: ${feature.properties.STORMTYPE}`
-      );
-    });
-  }, [forecastTrackData, map]);
+    addGeodesicPolylines(forecastTrackData.original.features, map);
+    addGeodesicPolylines(forecastTrackData.minus360.features, map);
+    addGeodesicPolylines(forecastTrackData.plus360.features, map);
+  }, [forecastTrackData, map, addGeodesicPolylines]);
 
   return null;
 };

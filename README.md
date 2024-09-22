@@ -14,6 +14,19 @@ pnpm dev
 bun dev
 ```
 
+
+//Dev Notes
+To populate the database "recreateData.ts" function should be run with the following code: npx ts-node recreateData.ts
+Make sure to edit and correct the csvFiles path, in case of an error.
+//
+
+
+
+
+
+
+
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

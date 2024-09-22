@@ -100,13 +100,58 @@ const ForecastCone: React.FC<ForecastConeProps> = ({ onDataLoad }) => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [shiftCycloneCoordinates, onDataLoad]);
 
   const bindPopup = (feature: Feature, layer: any) => {
-    if (feature.properties && feature.properties.STORMNAME) {
-      layer.bindPopup(
-        `<strong>${feature.properties.STORMNAME}</strong><br/>Max Wind: ${feature.properties.MAX_WIND} km/h`
-      );
+    if (feature.properties) {
+      const {
+        STORMNAME,
+        STORMTYPE,
+        MAX_WIND,
+        MAX_GUST,
+        MAX_LABEL,
+        BASIN,
+        FCSTPRD,
+        Shape__Area,
+        Shape__Length,
+        STORMNUM,
+        ADVISNUM,
+      } = feature.properties;
+
+      let popupContent = `<strong>Storm Name:</strong><strong> ${STORMNAME}</strong><br/>`;
+
+      if (STORMTYPE && STORMTYPE.trim()) {
+        popupContent += `<strong>Type:</strong> ${STORMTYPE}<br/>`;
+      }
+      if (BASIN && BASIN.trim()) {
+        popupContent += `<strong>Basin:</strong> ${BASIN}<br/>`;
+      }
+      if (FCSTPRD) {
+        popupContent += `<strong>Forecast Period:</strong> ${FCSTPRD} hours<br/>`;
+      }
+      if (MAX_WIND) {
+        popupContent += `<strong>Max Wind:</strong> ${MAX_WIND} km/h<br/>`;
+      }
+      if (MAX_GUST) {
+        popupContent += `<strong>Max Gust:</strong> ${MAX_GUST} km/h<br/>`;
+      }
+      if (MAX_LABEL && MAX_LABEL.trim()) {
+        popupContent += `<strong>Advisory Time:</strong> ${MAX_LABEL}<br/>`;
+      }
+      if (STORMNUM) {
+        popupContent += `<strong>Storm Number:</strong> ${STORMNUM}<br/>`;
+      }
+      if (ADVISNUM && ADVISNUM.trim()) {
+        popupContent += `<strong>Advisory Number:</strong> ${ADVISNUM}<br/>`;
+      }
+      if (Shape__Area) {
+        popupContent += `<strong>Shape Area:</strong> ${Shape__Area.toFixed(2)} km²<br/>`;
+      }
+      if (Shape__Length) {
+        popupContent += `<strong>Shape Length:</strong> ${Shape__Length.toFixed(2)} km<br/>`;
+      }
+
+      layer.bindPopup(popupContent);
     }
   };
 
