@@ -69,7 +69,6 @@ model vessel_variables {
   id                     String   @id @default(uuid())
   current_vessel_speed   Decimal  @db.Decimal(5, 2)
   current_draft_level    Decimal? @db.Decimal(5, 2)
-  imo                    Int
   fuel_usage_main_1      Decimal  @db.Decimal(10, 2)
   fuel_usage_main_1_type String
   fuel_usage_main_2      Decimal? @db.Decimal(10, 2)
@@ -77,5 +76,6 @@ model vessel_variables {
   hotel_load             Decimal? @db.Decimal(10, 2)
   hotel_load_type        String?
   laden_or_ballast       String?
-  vessel                 vessel   @relation(fields: [imo], references: [imo])
+  vessel_id              String
+  vessel                 vessel   @relation(fields: [vessel_id], references: [id])
 }

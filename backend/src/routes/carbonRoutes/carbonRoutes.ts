@@ -66,8 +66,6 @@ router.post("/calculate-stats", async (req, res) => {
     const vesselLength = stats.length_of_vessel;
     const vesselWidth = stats.beam_of_vessel;
     const maxDraftLevel = stats.max_draft_level;
-    let wettedHullExponent;
-    let speedExponent;
 
     let tableContent1;
 

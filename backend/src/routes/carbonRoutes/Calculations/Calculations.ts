@@ -211,7 +211,7 @@ export const calculateSpeed = (
   averageSpeed: number;
   totalDistance: number;
 } => {
-  const averageSpeed = totalDistance / (totalTime * 60);
+  const averageSpeed = totalDistance / (totalTime * 24);
 
   if (typeof departureDate === "string") {
     departureDate = new Date(departureDate);
@@ -461,13 +461,10 @@ export const calculateEmissionsAndPower = (
 };
 
 export const emissionFactors: Record<string, number> = {
-  diesel: 3206, // kg CO2 per tonne of diesel
+  marine_diesel_oil: 3206, // kg CO2 per tonne of diesel
   heavy_fuel_oil: 3114, // kg CO2 per tonne of heavy fuel oil
   lng: 2750, // kg CO2 per tonne of LNG
   marine_gas_oil: 3206, // kg CO2 per tonne of marine gas oil
-  methanol: 1375, // kg CO2 per tonne of methanol
-  hydrogen: 0, // kg CO2 per tonne of hydrogen (assuming green hydrogen)
-  vlsfo_380_cst: 3114, // kg CO2 per tonne of VLSFO 380 CST
   vlsfo_380: 3114,
   vlshfo_380: 3114,
   lsmgo: 3206,
