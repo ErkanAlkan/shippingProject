@@ -1,0 +1,9 @@
+.text-danger {
+  color: #d9534f;
+}
+
+.variable-form {
+  .row {
+    margin-bottom: 1rem !important;
+  }
+}

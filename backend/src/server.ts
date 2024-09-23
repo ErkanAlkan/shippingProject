@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import routes from './routes/shipRoutes/shipRoutes';
 import carbonRoutes from './routes/carbonRoutes/carbonRoutes';
+import vessel from './routes/vesselRoutes/vessel';
+import vesselVariable from './routes/vesselRoutes/vesselVariable';
 
 dotenv.config();
 const app = express();
@@ -15,6 +17,8 @@ app.use(cors({
 
 app.use('/api/ship', routes);
 app.use('/api/carbon', carbonRoutes);
+app.use('/api/vessel', vessel);
+app.use('/api/vessel-variable', vesselVariable);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

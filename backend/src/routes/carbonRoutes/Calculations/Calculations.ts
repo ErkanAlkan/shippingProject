@@ -34,9 +34,9 @@ export const calculateWettedHullExponent = (L: number, B: number, D1: number, D2
   const n: number = Math.log(S2 / S1) / Math.log(V2 / V1);
 
   // Apply empirical adjustment
-  const adjustedN: number = Math.min(Math.max(n, 0.65), 0.85);
+  const adjustedN: number = Math.min(Math.max(n, 0.65), 0.75);
 
-  return n;
+  return adjustedN;
 };
 
 // Function to calculate the speed exponent
@@ -465,6 +465,7 @@ export const emissionFactors: Record<string, number> = {
   heavy_fuel_oil: 3114, // kg CO2 per tonne of heavy fuel oil
   lng: 2750, // kg CO2 per tonne of LNG
   marine_gas_oil: 3206, // kg CO2 per tonne of marine gas oil
+  vlsfo: 3114,
   vlsfo_380: 3114,
   vlshfo_380: 3114,
   lsmgo: 3206,

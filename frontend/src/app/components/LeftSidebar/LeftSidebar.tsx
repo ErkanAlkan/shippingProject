@@ -10,7 +10,7 @@ import Link from "next/link";
 const MenuItem = ({ href, icon, label, collapsed }: { href: string, icon: any, label: string, collapsed: boolean }) => {
   return (
     <li className={styles.menuItem}>
-      <Link href={href}>
+      <Link href={href} className={styles.link}>
         <button className={styles.button}>
           <div className={styles.icon}><FontAwesomeIcon icon={icon} /></div>
           {!collapsed && <div className={styles.text}>{label}</div>}

@@ -1,0 +1,32 @@
+import { PrismaClient, vessel } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export const createVessel = async (data: vessel): Promise<vessel> => {
+    return prisma.vessel.create({
+        data,
+    });
+};
+
+export const deleteVesselById = async (id: string): Promise<vessel | null> => {
+    return prisma.vessel.delete({
+        where: {
+            id: id,
+        },
+    });
+};
+
+export const getAllVessels = async (): Promise<vessel[]> => {
+    console.log("called");
+    return prisma.vessel.findMany({
+        orderBy: { imo: 'asc' },
+    });
+};
+
+export const getVesselById = async (id: string): Promise<vessel | null> => {
+    return prisma.vessel.findFirst({
+        where: {
+            id: id,
+        },
+    });
+};
