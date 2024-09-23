@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.post("/create-vessel", async (req, res) => {
     const vesselData = req.body;
-    // console.log('vesselData:', vesselData);
     try {
         const newVessel = await createVessel(vesselData);
         res.status(201).json(newVessel);
@@ -17,7 +16,6 @@ router.post("/create-vessel", async (req, res) => {
 
 router.delete("/delete-vessel/:id", async (req, res) => {
     const { id } = req.params;
-    console.log('id:', id);
     try {
         const deletedVessel = await deleteVesselById(id);
         res.status(200).json(deletedVessel);
@@ -29,10 +27,8 @@ router.delete("/delete-vessel/:id", async (req, res) => {
 
 router.get("/get-vessel-list", async (req, res) => {
     try {
-        console.log("router.get ~ vessels: here");
         const vessels = await getAllVessels();
         res.json(vessels);
-        console.log("router.get ~ vessels:", vessels);
     } catch (error) {
         console.error("Error fetching vessels:", error);
         res.status(500).json({ error: "An error occurred while fetching vessels." });

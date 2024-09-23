@@ -146,9 +146,6 @@ router.post("/get-route", async (req, res) => {
 
       routeData = [...firstLegAccumulated, ...secondLegAccumulated, ...thirdLegAccumulated];
     }
-
-    console.log("Final route data with cumulative distances:", JSON.stringify(routeData, null, 2));
-
     res.json(routeData);
   } catch (error) {
     console.error("Error fetching route data:", error);

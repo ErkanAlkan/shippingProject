@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import routes from './routes/shipRoutes/shipRoutes';
-import carbonRoutes from './routes/carbonRoutes/carbonRoutes';
+import shipRoutes from './routes/shipRoutes/shipRoutes';
+import carbon from './routes/carbonRoutes/carbonRoutes';
 import vessel from './routes/vesselRoutes/vessel';
 import vesselVariable from './routes/vesselRoutes/vesselVariable';
 
@@ -15,8 +15,8 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 
-app.use('/api/ship', routes);
-app.use('/api/carbon', carbonRoutes);
+app.use('/api/ship', shipRoutes);
+app.use('/api/carbon', carbon);
 app.use('/api/vessel', vessel);
 app.use('/api/vessel-variable', vesselVariable);
 

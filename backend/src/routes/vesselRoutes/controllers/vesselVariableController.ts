@@ -22,7 +22,6 @@ export const getVesselByVariablesVesselId =
   async (
     vesselId: string,
   ): Promise<vessel_variables[]> => {
-    // console.log('vesselId:', vesselId);
     return prisma.vessel_variables.findMany(
       {
         where: {

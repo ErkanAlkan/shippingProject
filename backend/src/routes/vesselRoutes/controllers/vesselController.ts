@@ -17,7 +17,6 @@ export const deleteVesselById = async (id: string): Promise<vessel | null> => {
 };
 
 export const getAllVessels = async (): Promise<vessel[]> => {
-    console.log("called");
     return prisma.vessel.findMany({
         orderBy: { imo: 'asc' },
     });

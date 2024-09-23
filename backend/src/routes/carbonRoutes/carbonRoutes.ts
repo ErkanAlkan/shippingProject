@@ -1,5 +1,3 @@
-//carbonRoutes.ts
-
 import express from "express";
 import {
   vesselStats,
@@ -53,7 +51,6 @@ function countLadenOrBallast(vessel: Vessel): {
       }
     }
   });
-
   return { totalLadenAndBalast, ladenCount, ballastCount };
 }
 
