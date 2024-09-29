@@ -7,18 +7,40 @@ interface RightSidebarProps {
   onToggleTopbar: () => void;
   onToggleTopbarForCarbon: () => void;
   onToggleAllCycloneLayers: () => void;
+  showTopbar: boolean;
+  showTopbarForCarbon: boolean;
+  showCycloneLayers: boolean;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleTopbar, onToggleTopbarForCarbon, onToggleAllCycloneLayers }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({
+  onToggleTopbar,
+  onToggleTopbarForCarbon,
+  onToggleAllCycloneLayers,
+  showTopbar,
+  showTopbarForCarbon,
+  showCycloneLayers,
+}) => {
   return (
     <div className={styles.rightSidebar}>
-      <button className={styles.iconButton} onClick={onToggleTopbar} title="Toggle Topbar">
+      <button
+        className={`${styles.iconButton} ${showTopbar ? styles.on : ""}`}
+        onClick={onToggleTopbar}
+        title="Toggle Topbar"
+      >
         <FontAwesomeIcon icon={faEye} size="2x" />
       </button>
-      <button className={styles.iconButton} onClick={onToggleTopbarForCarbon} title="Toggle Topbar for Carbon">
+      <button
+        className={`${styles.iconButton} ${showTopbarForCarbon ? styles.on : ""}`}
+        onClick={onToggleTopbarForCarbon}
+        title="Toggle Topbar for Carbon"
+      >
         <FontAwesomeIcon icon={faCloud} size="2x" />
       </button>
-      <button className={styles.iconButton} onClick={onToggleAllCycloneLayers} title="Toggle Cyclone Layers">
+      <button
+        className={`${styles.iconButton} ${showCycloneLayers ? styles.on : ""}`}
+        onClick={onToggleAllCycloneLayers}
+        title="Toggle Cyclone Layers"
+      >
         <FontAwesomeIcon icon={faTornado} size="2x" />
       </button>
     </div>

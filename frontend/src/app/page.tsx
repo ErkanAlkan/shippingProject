@@ -9,6 +9,7 @@ import RightSidebar from "./components/RightSidebar/RightSidebar";
 import styles from "./ClientRootLayout.module.css";
 import { useRouteContext } from "~/app/context/RouteContext";
 import { useLayerContext } from "~/app/context/LayerContext";
+import { useTopbarContext } from "~/app/context/TopbarContext";
 
 const Map = dynamic(() => import("~/app/components/Map/Map"), { ssr: false });
 
@@ -18,13 +19,10 @@ interface User {
 
 const HomePage = () => {
   const router = useRouter();
-  const [showTopbar, setShowTopbar] = useState(true);
-  const [showTopbarForCarbon, setShowTopbarForCarbon] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
   const { globalRouteData } = useRouteContext();
-  console.log("HomePage ~ globalRouteData:", globalRouteData);
-
   const { showCycloneLayers, setShowCycloneLayers } = useLayerContext();
+  const { showTopbar, showTopbarForCarbon, toggleTopbar, toggleTopbarForCarbon } = useTopbarContext();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -37,16 +35,13 @@ const HomePage = () => {
         router.push("/auth/signin");
       }
     };
-
     checkUser();
   }, [router]);
-
-  const toggleTopbar = () => setShowTopbar((prev) => !prev);
-  const toggleTopbarForCarbon = () => setShowTopbarForCarbon((prev) => !prev);
 
   const toggleAllCycloneLayers = () => {
     setShowCycloneLayers((prev: boolean) => !prev);
   };
+
   const totalDistance = useMemo(() => {
     return globalRouteData && globalRouteData.length > 0
       ? parseFloat(globalRouteData[globalRouteData.length - 1].cumulative_dist)
@@ -73,6 +68,9 @@ const HomePage = () => {
           onToggleTopbar={toggleTopbar}
           onToggleTopbarForCarbon={toggleTopbarForCarbon}
           onToggleAllCycloneLayers={toggleAllCycloneLayers}
+          showTopbar={showTopbar}
+          showTopbarForCarbon={showTopbarForCarbon}
+          showCycloneLayers={showCycloneLayers}
         />
       </div>
     );
