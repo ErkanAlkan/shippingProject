@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useMap } from "react-leaflet";
 import axios from "axios";
 import L from "leaflet";
@@ -11,6 +11,8 @@ interface ObservedTrackLayerProps {
 const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) => {
   const [observedTrackData, setObservedTrackData] = useState<any>(null);
   const map = useMap();
+  
+  const geodesicPolylines = useRef<L.Geodesic[]>([]);
 
   const shiftCoordinates = useCallback((data: any, offset: number) => {
     if (!data || !data.features) return data;
@@ -35,7 +37,7 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
       Storm Type: ${feature.properties.STORMTYPE || "Unknown"}
     `;
     polyline.bindPopup(popupContent);
-  },[]);
+  }, []);
 
   const addGeodesicPolylines = useCallback((features: any[], map: L.Map) => {
     features.forEach((feature: any) => {
@@ -45,7 +47,9 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
         color: "red",
         wrap: false,
       }).addTo(map);
+      
       bindPopup(feature, geodesicPolyline);
+      geodesicPolylines.current.push(geodesicPolyline);
     });
   }, [bindPopup]);
 
@@ -86,6 +90,11 @@ const ObservedTrackLayer: React.FC<ObservedTrackLayerProps> = ({ onDataLoad }) =
     addGeodesicPolylines(observedTrackData.original.features, map);
     addGeodesicPolylines(observedTrackData.minus360.features, map);
     addGeodesicPolylines(observedTrackData.plus360.features, map);
+
+    return () => {
+      geodesicPolylines.current.forEach((polyline) => map.removeLayer(polyline));
+      geodesicPolylines.current = [];
+    };
   }, [observedTrackData, map, addGeodesicPolylines]);
 
   return null;

@@ -6,13 +6,28 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faShip, faUser, faRightFromBracket, faHouse } from "@fortawesome/free-solid-svg-icons";
 import "~/app/fontAwesome";
 import Link from "next/link";
+import axios from 'axios';
 
-const MenuItem = ({ href, icon, label, collapsed }: { href: string, icon: any, label: string, collapsed: boolean }) => {
+const MenuItem = ({
+  href,
+  icon,
+  label,
+  collapsed,
+  onClick,
+}: {
+  href: string;
+  icon: any;
+  label: string;
+  collapsed: boolean;
+  onClick?: () => void;
+}) => {
   return (
     <li className={styles.menuItem}>
-      <Link href={href} className={styles.link}>
+      <Link href={href} className={styles.link} onClick={onClick}>
         <button className={styles.button}>
-          <div className={styles.icon}><FontAwesomeIcon icon={icon} /></div>
+          <div className={styles.icon}>
+            <FontAwesomeIcon icon={icon} />
+          </div>
           {!collapsed && <div className={styles.text}>{label}</div>}
         </button>
       </Link>
@@ -27,7 +42,19 @@ const Sidebar = () => {
     { href: "/", icon: faHouse, label: "Home" },
     { href: "/vessel", icon: faShip, label: "Vessels" },
     { href: "/profile", icon: faUser, label: "Profile" },
-    { href: "/logout", icon: faRightFromBracket, label: "Logout" }
+    {
+      href: "#", 
+      icon: faRightFromBracket,
+      label: "Logout",
+      onClick: async () => {
+        try {
+          await axios.post('http://localhost:4000/api/auth/logout', {}, { withCredentials: true });
+          window.location.href = '/';
+        } catch (error) {
+          console.error("Logout error:", error);
+        }
+      },
+    },
   ];
 
   return (
@@ -47,6 +74,7 @@ const Sidebar = () => {
             icon={item.icon}
             label={item.label}
             collapsed={collapsed}
+            onClick={item.onClick}
           />
         ))}
       </ul>

@@ -1,17 +1,15 @@
-import React from 'react';
-import styles from './RightSidebar.module.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faCloud } from '@fortawesome/free-solid-svg-icons';
+import React from "react";
+import styles from "./RightSidebar.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faCloud, faTornado } from "@fortawesome/free-solid-svg-icons";
 
 interface RightSidebarProps {
   onToggleTopbar: () => void;
   onToggleTopbarForCarbon: () => void;
+  onToggleAllCycloneLayers: () => void;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({
-  onToggleTopbar,
-  onToggleTopbarForCarbon,
-}) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleTopbar, onToggleTopbarForCarbon, onToggleAllCycloneLayers }) => {
   return (
     <div className={styles.rightSidebar}>
       <button className={styles.iconButton} onClick={onToggleTopbar} title="Toggle Topbar">
@@ -19,6 +17,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
       </button>
       <button className={styles.iconButton} onClick={onToggleTopbarForCarbon} title="Toggle Topbar for Carbon">
         <FontAwesomeIcon icon={faCloud} size="2x" />
+      </button>
+      <button className={styles.iconButton} onClick={onToggleAllCycloneLayers} title="Toggle Cyclone Layers">
+        <FontAwesomeIcon icon={faTornado} size="2x" />
       </button>
     </div>
   );

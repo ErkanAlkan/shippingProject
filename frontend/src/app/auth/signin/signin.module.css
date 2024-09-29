@@ -1,0 +1,31 @@
+.signInBackground {
+    background: linear-gradient(to bottom right, #e3f2fd, #90caf9);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+  
+  .btn-outline-secondary {
+    border-color: #6c757d;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+  
+  input.form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+  
+  

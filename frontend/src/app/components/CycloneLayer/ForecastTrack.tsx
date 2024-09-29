@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useMap } from "react-leaflet";
 import axios from "axios";
 import L from "leaflet";
@@ -9,6 +9,8 @@ interface ForecastTrackLayerProps {}
 const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
   const [forecastTrackData, setForecastTrackData] = useState<any>(null);
   const map = useMap();
+
+  const geodesicPolylines = useRef<L.Geodesic[]>([]);
 
   const shiftCoordinates = useCallback((data: any, offset: number) => {
     if (!data || !data.features) return data;
@@ -37,14 +39,15 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
 
   const addGeodesicPolylines = useCallback((features: any[], map: L.Map) => {
     features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
+      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]); // LatLng
       const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 2,
+        weight: 4,
         color: "red",
-        dashArray: "5, 5",
         wrap: false,
       }).addTo(map);
+      
       bindPopup(feature, geodesicPolyline);
+      geodesicPolylines.current.push(geodesicPolyline);
     });
   }, [bindPopup]);
 
@@ -77,6 +80,11 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
     addGeodesicPolylines(forecastTrackData.original.features, map);
     addGeodesicPolylines(forecastTrackData.minus360.features, map);
     addGeodesicPolylines(forecastTrackData.plus360.features, map);
+
+    return () => {
+      geodesicPolylines.current.forEach((polyline) => map.removeLayer(polyline));
+      geodesicPolylines.current = [];
+    };
   }, [forecastTrackData, map, addGeodesicPolylines]);
 
   return null;

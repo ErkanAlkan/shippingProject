@@ -1,24 +1,20 @@
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { RouteData } from '~/app/types/types';
 
 interface RouteContextType {
-  globalRouteData: any[];
-  setGlobalRouteData: (data: any[]) => void;
+  globalRouteData: RouteData[];
+  setGlobalRouteData: (data: RouteData[]) => void; 
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined);
 
 export const RouteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [globalRouteData, setGlobalRouteData] = useState<any[]>([]);
-  
+  const [globalRouteData, setGlobalRouteData] = useState<RouteData[]>([]);
 
   return (
-    <RouteContext.Provider 
-      value={{ 
-        globalRouteData, 
-        setGlobalRouteData
-      }}>
+    <RouteContext.Provider value={{ globalRouteData, setGlobalRouteData }}>
       {children}
     </RouteContext.Provider>
   );

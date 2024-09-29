@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller, Control } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -53,11 +53,12 @@ const validationSchema = Yup.object().shape({
 });
 
 const Topbar = () => {
-  const { setGlobalRouteData } = useRouteContext();
+  const { globalRouteData, setGlobalRouteData } = useRouteContext();
 
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<TopBarFormData>({
     resolver: yupResolver(validationSchema),
@@ -68,6 +69,37 @@ const Topbar = () => {
       destinationPort: "",
     },
   });
+
+  useEffect(() => {
+    if (globalRouteData.length > 0) {
+      const firstPoint = globalRouteData[0];
+      const lastPoint = globalRouteData[globalRouteData.length - 1];
+  
+      setValue("originPort", firstPoint.origin || "");
+      setValue("destinationPort", lastPoint.destination || "");
+  
+      const middlePoints = globalRouteData.slice(1, globalRouteData.length - 1);
+      let middlePoint1 = "";
+      let middlePoint2 = "";
+  
+      for (const point of middlePoints) {
+        if (middlePointOptions.includes(point.origin) || middlePointOptions.includes(point.destination)) {
+          const matchedPoint = middlePointOptions.includes(point.origin)
+            ? point.origin
+            : point.destination;
+  
+          if (!middlePoint1) {
+            middlePoint1 = matchedPoint;
+            setValue("middlePoint1", matchedPoint); 
+          } else if (!middlePoint2 && matchedPoint !== middlePoint1) {
+            middlePoint2 = matchedPoint;
+            setValue("middlePoint2", matchedPoint); 
+            break;
+          }
+        }
+      }
+    }
+  }, [globalRouteData, setValue]);
 
   const onSubmit = async (data: TopBarFormData) => {
     try {

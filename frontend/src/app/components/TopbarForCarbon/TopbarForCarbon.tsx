@@ -7,9 +7,9 @@ import * as Yup from "yup";
 import styles from "./TopbarForCarbon.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
 import axios from "axios";
-import { useRouteContext } from "~/app/context/RouteContext";
 import Swal from "sweetalert2";
 import TableForCarbon from "../TableForCarbon/TableForCarbon";
+import {RouteData} from '../../../app/types/types';
 
 interface TopbarForCarbonFormData {
   vessel: string;
@@ -20,6 +20,13 @@ interface TopbarForCarbonFormData {
   inputType: number;
   draftLevel?: number | null;
 }
+
+interface TopbarForCarbonProps {
+  totalDistance: number;
+  globalRouteData: RouteData[];
+}
+
+
 
 const validationSchema = Yup.object().shape({
   vessel: Yup.string()
@@ -60,7 +67,7 @@ const validationSchema = Yup.object().shape({
   draftLevel: Yup.number().nullable().min(1, "Draft Level must be greater than or equal to 1"),
 });
 
-const TopbarForCarbon = () => {
+const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
   const [combinedContent, setCombinedContent] = useState(null);
   const { handleSubmit, control, watch, reset, setValue } = useForm<TopbarForCarbonFormData>({
     resolver: yupResolver(validationSchema),
@@ -75,9 +82,7 @@ const TopbarForCarbon = () => {
     },
   });
 
-  const { globalRouteData } = useRouteContext();
   const [selectedOption, setSelectedOption] = React.useState<string>("");
-  const [totalDistance, setTotalDistance] = useState<number | null>(null);
 
   const inputType = watch("inputType");
   const vessel = watch("vessel");
@@ -88,13 +93,14 @@ const TopbarForCarbon = () => {
   const autoCompleteOptions =
     inputType === 0 ? totalTimeOptions : inputType === 1 ? avgSpeedOptions : [exactDatesOptions[0]];
 
-  useEffect(() => {
-    if (globalRouteData && globalRouteData.length > 0) {
-      const lastIndex = globalRouteData.length - 1;
-      const lastCumulativeDist = parseFloat(globalRouteData[lastIndex].cumulative_dist);
-      setTotalDistance(lastCumulativeDist);
-    }
-  }, [globalRouteData]);
+  // useEffect(() => {
+  //   if (globalRouteData && globalRouteData.length > 0) {
+  //     console.log("useEffect ~ globalRouteData:", globalRouteData);
+  //     const lastIndex = globalRouteData.length - 1;
+  //     const lastCumulativeDist = parseFloat(globalRouteData[lastIndex].cumulative_dist);
+  //     setTotalDistance(lastCumulativeDist);
+  //   }
+  // }, [globalRouteData]);
 
   useEffect(() => {
     setValue("totalTime", null);

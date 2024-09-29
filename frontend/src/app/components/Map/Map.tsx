@@ -29,6 +29,12 @@ interface GeodesicPolylineProps {
   positions: LatLngTuple[];
 }
 
+interface MapProps {
+  showForecastConeLayer: boolean;
+  showObservedTrackLayer: boolean;
+  showForecastTrackLayer: boolean;
+}
+
 const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
   const map = useMap();
 
@@ -65,7 +71,7 @@ const SetViewOnRouteData: React.FC<{ center: LatLngTuple | null }> = ({ center }
   return null;
 };
 
-const Map: React.FC = () => {
+const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer, showForecastTrackLayer }) => {
   const { globalRouteData } = useRouteContext();
   const [adjustedCoordinates, setAdjustedCoordinates] = useState<LatLngTuple[]>([]);
   const [center, setCenter] = useState<LatLngTuple | null>(null);
@@ -91,7 +97,7 @@ const Map: React.FC = () => {
   });
 
   useEffect(() => {
-    if (globalRouteData && globalRouteData.length > 0 && forecastConeData && observedTrackData) {
+    if (globalRouteData && globalRouteData.length > 0) {
       const rawCoordinates: LatLngTuple[] = [];
       const adjustedCoordinates: LatLngTuple[] = [];
 
@@ -105,91 +111,102 @@ const Map: React.FC = () => {
 
       setAdjustedCoordinates(adjustedCoordinates);
       setCenter(calculateMeanLatLon(adjustedCoordinates));
+    }
+  }, [globalRouteData]);
 
-      let foundIntersection = false;
+  useEffect(() => {
+    const checkIntersectionsWithFeatures = (
+      features: any[],
+      adjustedCoordinates: LatLngTuple[],
+      checkFunction: (adjustedCoordinates: LatLngTuple[], polygon: [number, number][][]) => LatLngTuple | null
+    ): LatLngTuple | null => {
+      for (const feature of features) {
+        const polygon = feature?.geometry?.coordinates as [number, number][][];
+        const intersection = checkFunction(adjustedCoordinates, polygon);
+        if (intersection) {
+          return intersection;
+        }
+      }
+      return null;
+    };
+
+    const handleConeDataIntersection = (adjustedCoordinates: LatLngTuple[]) => {
+      const originalFeatures = forecastConeData?.original?.features || [];
+      const minus360Features = forecastConeData?.minus360?.features || [];
+      const plus360Features = forecastConeData?.plus360?.features || [];
+
+      const intersectionOriginal = checkIntersectionsWithFeatures(
+        originalFeatures,
+        adjustedCoordinates,
+        checkIntersectionBetweenLineAndPolygon
+      );
+      const intersectionMinus360 = checkIntersectionsWithFeatures(
+        minus360Features,
+        adjustedCoordinates,
+        checkIntersectionBetweenLineAndPolygon
+      );
+      const intersectionPlus360 = checkIntersectionsWithFeatures(
+        plus360Features,
+        adjustedCoordinates,
+        checkIntersectionBetweenLineAndPolygon
+      );
+
+      return intersectionOriginal || intersectionMinus360 || intersectionPlus360 || null;
+    };
+
+    const handleTrackDataIntersection = (adjustedCoordinates: LatLngTuple[]): LatLngTuple | null => {
+      const checkIntersectionForTrackGroup = (trackData: any): LatLngTuple | null => {
+        for (const feature of trackData.features) {
+          const trackCoordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
+          const intersectionPoint = checkIntersectionBetweenLines(
+            adjustedCoordinates as [number, number][],
+            trackCoordinates
+          );
+
+          if (intersectionPoint) {
+            return intersectionPoint;
+          }
+        }
+        return null;
+      };
+
+      const intersectionOriginalTrack = checkIntersectionForTrackGroup(observedTrackData.original);
+      const intersectionMinus360Track = checkIntersectionForTrackGroup(observedTrackData.minus360);
+      const intersectionPlus360Track = checkIntersectionForTrackGroup(observedTrackData.plus360);
+
+      return intersectionOriginalTrack || intersectionMinus360Track || intersectionPlus360Track || null;
+    };
+
+    const findAndHandleIntersection = () => {
+      if (!adjustedCoordinates.length) return;
+
+      let intersection: LatLngTuple | null = null;
 
       if (forecastConeData) {
-        const checkIntersectionsWithFeatures = (features: any, adjustedCoordinates: LatLngTuple[]) => {
-          let index = 0;
-          for (const feature of features) {
-            index++;
-            const polygon = feature?.geometry?.coordinates as [number, number][][];
-            const intersection = checkIntersectionBetweenLineAndPolygon(
-              adjustedCoordinates,
-              polygon
-            ) as LatLngTuple | null;
-            if (intersection) {
-              return intersection;
-            }
-          }
-          return null;
-        };
-
-        const originalFeatures = forecastConeData?.original?.features || [];
-        const minus360Features = forecastConeData?.minus360?.features || [];
-        const plus360Features = forecastConeData?.plus360?.features || [];
-
-        const intersectionOriginal = checkIntersectionsWithFeatures(originalFeatures, adjustedCoordinates);
-        const intersectionMinus360 = checkIntersectionsWithFeatures(minus360Features, adjustedCoordinates);
-        const intersectionPlus360 = checkIntersectionsWithFeatures(plus360Features, adjustedCoordinates);
-
-        if (intersectionOriginal || intersectionMinus360 || intersectionPlus360) {
-          foundIntersection = true;
-
-          const intersection = intersectionOriginal || intersectionMinus360 || intersectionPlus360;
-
-          setIntersectionPoint(intersection);
-          Swal.fire({
-            title: "Warning",
-            text: "Your route intersects with the forecasted cone!",
-            icon: "warning",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#3085d6",
-          });
-        } else {
-          setIntersectionPoint(null);
-          console.log("No intersection found with the forecasted cone!");
-        }
+        intersection = handleConeDataIntersection(adjustedCoordinates);
       }
 
-      if (observedTrackData && !foundIntersection) {
-        const checkIntersectionForTrackGroup = (trackData: any): LatLngTuple | null => {
-          for (const feature of trackData.features) {
-            const trackCoordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]);
-            const intersectionPoint = checkIntersectionBetweenLines(
-              adjustedCoordinates as [number, number][],
-              trackCoordinates
-            );
-
-            if (intersectionPoint) {
-              return intersectionPoint;
-            }
-          }
-          return null;
-        };
-
-        const intersectionOriginalTrack = checkIntersectionForTrackGroup(observedTrackData.original);
-        const intersectionMinus360Track = checkIntersectionForTrackGroup(observedTrackData.minus360);
-        const intersectionPlus360Track = checkIntersectionForTrackGroup(observedTrackData.plus360);
-
-        const intersection = intersectionOriginalTrack || intersectionMinus360Track || intersectionPlus360Track;
-
-        if (intersection) {
-          setIntersectionPoint(intersection);
-          Swal.fire({
-            title: "Warning",
-            text: "Your route intersects with the observed track!",
-            icon: "warning",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#3085d6",
-          });
-        } else {
-          setIntersectionPoint(null);
-          console.log("No intersection with the observed track!");
-        }
+      if (!intersection && observedTrackData) {
+        intersection = handleTrackDataIntersection(adjustedCoordinates);
       }
-    }
-  }, [globalRouteData, forecastConeData, observedTrackData]);
+
+      if (intersection) {
+        setIntersectionPoint(intersection);
+        Swal.fire({
+          title: "Warning",
+          text: "Your route intersects with a forecasted or observed area!",
+          icon: "warning",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        setIntersectionPoint(null);
+        console.log("No intersection found.");
+      }
+    };
+
+    findAndHandleIntersection();
+  }, [forecastConeData, observedTrackData, adjustedCoordinates]);
 
   const handleForecastConeDataLoad = useCallback(
     (data: any) => {
@@ -246,7 +263,7 @@ const Map: React.FC = () => {
       setIsDestinationPopupOpen(false);
     }
   };
-  
+
   const maxBounds: LatLngBounds = new LatLngBounds([180, -360], [-180, 540]);
 
   return (
@@ -264,9 +281,9 @@ const Map: React.FC = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <ForecastConeLayer onDataLoad={handleForecastConeDataLoad} />
-      <ObservedTrackLayer onDataLoad={handleObservedTrackDataLoad} />
-      <ForecastTrackLayer />
+      {showForecastConeLayer && <ForecastConeLayer onDataLoad={handleForecastConeDataLoad} />}
+      {showObservedTrackLayer && <ObservedTrackLayer onDataLoad={handleObservedTrackDataLoad} />}
+      {showForecastTrackLayer && <ForecastTrackLayer />}
       {adjustedCoordinates.map((position, index) => (
         <Marker
           key={index}

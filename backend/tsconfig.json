@@ -11,7 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "useUnknownInCatchVariables": true,
