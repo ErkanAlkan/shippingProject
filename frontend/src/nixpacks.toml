@@ -1,0 +1,8 @@
+[backend]
+directory = "backend"
+start = "npm start" # or your backend's start command
+
+[frontend]
+directory = "frontend"
+build = "npm run build"
+start = "npm run start" # or next start for production
