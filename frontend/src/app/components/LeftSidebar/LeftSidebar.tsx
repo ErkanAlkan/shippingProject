@@ -41,7 +41,7 @@ const Sidebar = () => {
   const menuItems = [
     { href: "/", icon: faHouse, label: "Home" },
     { href: "/vessel", icon: faShip, label: "Vessels" },
-    { href: "/profile", icon: faUser, label: "Profile" },
+    // { href: "/profile", icon: faUser, label: "Profile" },
     {
       href: "#", 
       icon: faRightFromBracket,

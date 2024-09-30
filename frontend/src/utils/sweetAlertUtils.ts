@@ -47,3 +47,13 @@ export const showConfirmAlert = async (
     cancelButtonColor: '#3085d6',
   });
 };
+
+export const showWarningAlert = (message: string = 'Warning: Something requires your attention!') => {
+  Swal.fire({
+    title: "Warning",
+    text: message,
+    icon: "warning",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#3085d6",
+  });
+};
