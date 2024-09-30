@@ -6,6 +6,9 @@ import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 import { RouteProvider } from "~/app/context/RouteContext";
 import { LayerProvider } from "~/app/context/LayerContext";
 import { TopbarProvider } from "~/app/context/TopbarContext";
+import axios from "axios";
+
+axios.defaults.baseURL = "http://localhost:4000";
 
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

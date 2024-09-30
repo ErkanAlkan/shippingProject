@@ -1,7 +1,7 @@
 'use client';
 
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 
@@ -30,7 +30,7 @@ const VesselCard: React.FC<VesselCardProps> = ({ vesselId }) => {
   const [vessel, setVessel] = useState<Vessel | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchVessel = async () => {
+  const fetchVessel = useCallback(async () => {
     try {
       const response = await axios.get(`/api/vessel/get-vessel/${vesselId}`);
       setVessel(response.data);
@@ -45,11 +45,11 @@ const VesselCard: React.FC<VesselCardProps> = ({ vesselId }) => {
         confirmButtonColor: '#3085d6',
       });
     }
-  };
+  }, [vesselId]);
 
   useEffect(() => {
     fetchVessel();
-  }, []);
+  }, [fetchVessel]);
 
   if (loading) {
     return <p>Loading vessel data...</p>;

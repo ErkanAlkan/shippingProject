@@ -1,9 +1,9 @@
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { Dropdown, Table } from 'react-bootstrap';
-import Swal from 'sweetalert2';
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
+import React, { useEffect, useState, useCallback } from "react";
+import { Dropdown, Table } from "react-bootstrap";
+import Swal from "sweetalert2";
 
 interface VesselVariables {
   id: string;
@@ -28,46 +28,46 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
   const [variables, setVariables] = useState<VesselVariables[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchVesselVariables = async () => {
+  const fetchVesselVariables = useCallback(async () => {
     try {
       const response = await axios.get(`/api/vessel-variable/get-vessel-variable-list/${vesselId}`);
       setVariables(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching vessel variables:', error);
+      console.error("Error fetching vessel variables:", error);
     }
-  };
+  }, [vesselId, setVariables, setLoading]);
 
   const handleDelete = async (id: string) => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'This will permanently delete the variable.',
-      icon: 'warning',
+      title: "Are you sure?",
+      text: "This will permanently delete the variable.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await axios.delete(`/api/vessel-variable/delete-vessel-variable/${id}`);
           setVariables(variables.filter((variables) => variables.id !== id));
           Swal.fire({
-            title: 'Deleted!',
-            text: 'Vessel variable has been deleted.',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#3085d6',
+            title: "Deleted!",
+            text: "Vessel variable has been deleted.",
+            icon: "success",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#3085d6",
           });
         } catch (error) {
-          console.error('Error deleting vessel variable:', error);
+          console.error("Error deleting vessel variable:", error);
           Swal.fire({
-            title: 'Error',
-            text: 'Failed to delete vessel variable.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#3085d6',
+            title: "Error",
+            text: "Failed to delete vessel variable.",
+            icon: "error",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#3085d6",
           });
         }
       }
@@ -76,7 +76,7 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
 
   useEffect(() => {
     fetchVesselVariables();
-  }, [vesselId, refreshTrigger]);
+  }, [vesselId, refreshTrigger, fetchVesselVariables]);
 
   if (loading) {
     return <p>Loading vessel variables...</p>;
@@ -88,11 +88,13 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
         <tr>
           <th></th>
           <th>
-            Current Vessel Speed<br />
+            Current Vessel Speed
+            <br />
             <small>(knots)</small>
           </th>
           <th>
-            Current Draft Level<br />
+            Current Draft Level
+            <br />
             <small>(meters)</small>
           </th>
           <th>
@@ -100,24 +102,29 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
             <small>(tons)</small>
           </th>
           <th>
-            Fuel Usage Main 1 Type<br />
+            Fuel Usage Main 1 Type
+            <br />
           </th>
           <th>
             Fuel Usage Main 2<br />
             <small>(tons)</small>
           </th>
           <th>
-            Fuel Usage Main 2 Type<br />
+            Fuel Usage Main 2 Type
+            <br />
           </th>
           <th>
-            Hotel Load<br />
+            Hotel Load
+            <br />
             <small>(tons)</small>
           </th>
           <th>
-            Hotel Load Type<br />
+            Hotel Load Type
+            <br />
           </th>
           <th>
-            Laden or Ballast<br />
+            Laden or Ballast
+            <br />
           </th>
         </tr>
       </thead>
@@ -136,20 +143,19 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
               </Dropdown>
             </td>
             <td>{variable.current_vessel_speed}</td>
-            <td>{variable.current_draft_level ?? 'N/A'}</td>
+            <td>{variable.current_draft_level ?? "N/A"}</td>
             <td>{variable.fuel_usage_main_1}</td>
             <td>{variable.fuel_usage_main_1_type}</td>
-            <td>{variable.fuel_usage_main_2 ?? 'N/A'}</td>
-            <td>{variable.fuel_usage_main_2_type ?? 'N/A'}</td>
-            <td>{variable.hotel_load ?? 'N/A'}</td>
-            <td>{variable.hotel_load_type ?? 'N/A'}</td>
-            <td>{variable.laden_or_ballast ?? 'N/A'}</td>
+            <td>{variable.fuel_usage_main_2 ?? "N/A"}</td>
+            <td>{variable.fuel_usage_main_2_type ?? "N/A"}</td>
+            <td>{variable.hotel_load ?? "N/A"}</td>
+            <td>{variable.hotel_load_type ?? "N/A"}</td>
+            <td>{variable.laden_or_ballast ?? "N/A"}</td>
           </tr>
         ))}
       </tbody>
     </Table>
   );
-  
 };
 
 export default VesselVariablesList;
