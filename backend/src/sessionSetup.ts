@@ -17,7 +17,7 @@ const pool = new Pool({
 
 export const sessionMiddleware = session({
   store: new PgStore({
-    pool: pool, 
+    pool: pool,
     tableName: 'session',
   }),
   secret: process.env.SESSION_SECRET || 'your_default_secret',
@@ -26,6 +26,7 @@ export const sessionMiddleware = session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60,
   },
 });
