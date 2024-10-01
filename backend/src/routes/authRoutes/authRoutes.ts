@@ -48,7 +48,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "/api/auth/google/callback",
+      callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
     },
     async (accessToken: string, refreshToken: string, profile: GoogleProfile, done: (err: any, user?: any) => void) => {
       console.log("Google Profile:", profile);
@@ -151,6 +151,7 @@ router.post("/logout", (req: Request, res: Response) => {
 
 
 router.get("/session", (req: Request, res: Response) => {
+  console.log("Session data:", req.session);
   if (req.isAuthenticated() && req.user) {
     const user = req.user as User;
     res.status(200).json({ email: user.email });

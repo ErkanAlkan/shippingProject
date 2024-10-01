@@ -32,11 +32,13 @@ const HomePage = () => {
         const response = await axios.get(`${API_BASE_URL}/api/auth/session`, {
           withCredentials: true,
         });
+        console.log("checkUser ~ response:", response);
         setUser(response.data);
       } catch (error) {
         router.push("/auth/signin");
       }
     };
+
     checkUser();
   }, [router]);
 
