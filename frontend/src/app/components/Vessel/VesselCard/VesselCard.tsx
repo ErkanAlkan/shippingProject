@@ -5,6 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Vessel {
   id: string;
@@ -32,7 +33,7 @@ const VesselCard: React.FC<VesselCardProps> = ({ vesselId }) => {
 
   const fetchVessel = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/vessel/get-vessel/${vesselId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
       setVessel(response.data);
       setLoading(false);
     } catch (error) {

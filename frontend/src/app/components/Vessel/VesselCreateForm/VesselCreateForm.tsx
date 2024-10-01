@@ -8,6 +8,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const validationSchema = Yup.object().shape({
   imo: Yup.number().required("IMO is required"),
   name: Yup.string().required("Vessel name is required"),
@@ -48,7 +50,7 @@ const VesselForm = () => {
   const onSubmit = async (data: any) => {
     console.log("data:", data);
     try {
-      const response = await axios.post("/api/vessel/create-vessel", { ...data });
+      const response = await axios.post(`${API_BASE_URL}/api/vessel/create-vessel`, { ...data });
       const vesselData = response.data;
       console.log("vesselData:", vesselData);
       Swal.fire({

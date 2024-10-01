@@ -5,6 +5,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Dropdown, Table } from "react-bootstrap";
 import Swal from "sweetalert2";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface VesselVariables {
   id: string;
   current_vessel_speed: number;
@@ -24,13 +26,12 @@ interface VesselVariablesListProps {
 }
 
 const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, refreshTrigger }) => {
-  // console.log('vesselId:', vesselId);
   const [variables, setVariables] = useState<VesselVariables[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchVesselVariables = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/vessel-variable/get-vessel-variable-list/${vesselId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/vessel-variable/get-vessel-variable-list/${vesselId}`);
       setVariables(response.data);
       setLoading(false);
     } catch (error) {
@@ -51,7 +52,7 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`/api/vessel-variable/delete-vessel-variable/${id}`);
+          await axios.delete(`${API_BASE_URL}/api/vessel-variable/delete-vessel-variable/${id}`);
           setVariables(variables.filter((variables) => variables.id !== id));
           Swal.fire({
             title: "Deleted!",

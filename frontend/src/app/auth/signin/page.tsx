@@ -6,6 +6,8 @@ import Image from "next/image";
 import Swal from "sweetalert2";
 import { showLoadingAlert } from "../../../utils/sweetAlertUtils";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ export default function SignIn() {
     try {
       showLoadingAlert("Signing in");
       const response = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        `${API_BASE_URL}/api/auth/login`,
         {
           email,
           password,
@@ -39,7 +41,7 @@ export default function SignIn() {
   };
 
   const handleOAuthSignIn = (provider: string) => {
-    const redirectUri = `http://localhost:4000/api/auth/${provider}`;
+    const redirectUri = `${API_BASE_URL}/api/auth/${provider}`;
     window.location.href = redirectUri;
   };
 

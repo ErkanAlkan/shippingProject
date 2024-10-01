@@ -6,7 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faShip, faUser, faRightFromBracket, faHouse } from "@fortawesome/free-solid-svg-icons";
 import "~/app/fontAwesome";
 import Link from "next/link";
-import axios from 'axios';
+import axios from "axios";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const MenuItem = ({
   href,
@@ -41,15 +43,15 @@ const Sidebar = () => {
   const menuItems = [
     { href: "/", icon: faHouse, label: "Home" },
     { href: "/vessel", icon: faShip, label: "Vessels" },
-    // { href: "/profile", icon: faUser, label: "Profile" },
+    { href: "/profile", icon: faUser, label: "Profile" },
     {
-      href: "#", 
+      href: "#",
       icon: faRightFromBracket,
       label: "Logout",
       onClick: async () => {
         try {
-          await axios.post('http://localhost:4000/api/auth/logout', {}, { withCredentials: true });
-          window.location.href = '/';
+          await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
+          window.location.href = "/";
         } catch (error) {
           console.error("Logout error:", error);
         }

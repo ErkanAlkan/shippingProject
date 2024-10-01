@@ -7,18 +7,16 @@ import shipRoutes from './routes/shipRoutes/shipRoutes';
 import carbon from './routes/carbonRoutes/carbonRoutes';
 import vessel from './routes/vesselRoutes/vessel';
 import vesselVariable from './routes/vesselRoutes/vesselVariable';
-import authRoutes from './routes/authRoutes/authRoutes'; 
+import authRoutes from './routes/authRoutes/authRoutes';
 
 dotenv.config();
 
-console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
-console.log("PostgreSQL Password:", process.env.DB_PASSWORD);
-
 const app = express();
 const port = process.env.PORT || 4000;
+const clientURL = process.env.CLIENT_URL || 'http://localhost:3000';
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: clientURL,
   credentials: true
 }));
 
@@ -45,5 +43,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });

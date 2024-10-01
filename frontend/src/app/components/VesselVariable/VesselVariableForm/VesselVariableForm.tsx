@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import AutoComplete from '../../AutoComplete/AutoComplete';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const validationSchema = Yup.object().shape({
   current_vessel_speed: Yup.number().required('Current vessel speed is required'),
   current_draft_level: Yup.number().nullable(),
@@ -48,7 +50,7 @@ const VesselVariableForm: React.FC<VesselVariableFormProps> = ({ vesselId, onSuc
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await axios.post(`/api/vessel-variable/create-vessel-variable`, {
+      const response = await axios.post(`${API_BASE_URL}/api/vessel-variable/create-vessel-variable`, {
         vessel: {
           connect: {
             id: vesselId,

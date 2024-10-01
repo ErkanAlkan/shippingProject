@@ -7,7 +7,7 @@ import styles from "./Topbar.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
 import { useRouteContext } from "~/app/context/RouteContext";
 
-axios.defaults.baseURL = "http://localhost:4000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface TopBarFormData {
   originPort: string;
@@ -103,7 +103,7 @@ const Topbar = () => {
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
-      const response = await axios.post("/api/ship/get-route", {
+      const response = await axios.post(`${API_BASE_URL}/api/ship/get-route`, {
         origin: data.originPort,
         destination: data.destinationPort,
         middlePoints: [data.middlePoint1, data.middlePoint2].filter(Boolean),

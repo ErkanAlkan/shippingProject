@@ -17,6 +17,8 @@ import {
   showConfirmAlert,
 } from "../../../../utils/sweetAlertUtils";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface Vessel {
   id: string;
   imo: number;
@@ -32,6 +34,8 @@ interface Vessel {
   beam_of_vessel: number;
 }
 
+
+
 const VesselList: React.FC = () => {
   const [vessels, setVessels] = useState<Vessel[]>([]);
   const [expandedVesselId, setExpandedVesselId] = useState<string | null>(null);
@@ -41,12 +45,15 @@ const VesselList: React.FC = () => {
   const fetchVessels = async () => {
     showLoadingAlert("Fetching vessel data, please wait.");
     try {
-      const response = await axios.get("/api/vessel/get-vessel-list");
+      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel-list`);
+      
       setVessels(response.data);
-      Swal.close();
+      
     } catch (error) {
       console.error("Error fetching vessels:", error);
       showErrorAlert("Failed to load vessel data.");
+    }finally {
+      Swal.close();
     }
   };
 
@@ -59,7 +66,7 @@ const VesselList: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`/api/vessel/delete-vessel/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/vessel/delete-vessel/${id}`);
         setVessels(vessels.filter((vessel) => vessel.id !== id));
         showSuccessAlert("Vessel has been deleted.");
       } catch (error) {

@@ -17,6 +17,8 @@ interface User {
   email: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const HomePage = () => {
   const router = useRouter();
   const { globalRouteData } = useRouteContext();
@@ -27,7 +29,7 @@ const HomePage = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/auth/session", {
+        const response = await axios.get(`${API_BASE_URL}/api/auth/session`, {
           withCredentials: true,
         });
         setUser(response.data);
