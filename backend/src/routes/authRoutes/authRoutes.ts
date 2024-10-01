@@ -9,6 +9,7 @@ import { Profile as GitHubProfile } from "passport-github2";
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const clientURL = process.env.CLIENT_URL || "http://localhost:3000";
 
 type User = {
   id: number;
@@ -180,12 +181,11 @@ router.post("/register", async (req: Request, res: Response) => {
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 router.get("/google/callback", passport.authenticate("google", { failureRedirect: "/login" }), (req, res) => {
   console.log("User logged in:", req.user);
-  res.redirect("http://localhost:3000/");
+  res.redirect(clientURL);
 });
 
-router.get("/github", passport.authenticate("github"));
 router.get("/github/callback", passport.authenticate("github", { failureRedirect: "/login" }), (req, res) => {
-  res.redirect("http://localhost:3000/");
+  res.redirect(clientURL);
 });
 
 export default router;
