@@ -13,14 +13,26 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
-console.log(`Using port: ${port}`);
-const clientURL = process.env.CLIENT_URL || 'http://localhost:3000';
-console.log("clientURL:", clientURL);
 
-app.use(cors({
-  origin: clientURL,
-  credentials: true
-}));
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.CLIENT_URL
+];
+
+console.log("Allowed Origins:", allowedOrigins);
+
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (allowedOrigins.includes(origin!) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(sessionMiddleware);
