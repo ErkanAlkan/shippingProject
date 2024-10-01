@@ -39,6 +39,10 @@ app.use('/api/vessel', vessel);
 app.use('/api/vessel-variable', vesselVariable);
 app.use('/api/auth', authRoutes);
 
+app.get('/', (req: Request, res: Response) => {
+  res.send('Shipping Project API');
+});
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
