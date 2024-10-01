@@ -13,7 +13,9 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+console.log(`Using port: ${port}`);
 const clientURL = process.env.CLIENT_URL || 'http://localhost:3000';
+console.log("clientURL:", clientURL);
 
 app.use(cors({
   origin: clientURL,
