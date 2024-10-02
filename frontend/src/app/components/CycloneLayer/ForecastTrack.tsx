@@ -41,9 +41,10 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
     features.forEach((feature: any) => {
       const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]); // LatLng
       const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 4,
+        weight: 2,
         color: "red",
         wrap: false,
+        dashArray: '5, 10',
       }).addTo(map);
       
       bindPopup(feature, geodesicPolyline);

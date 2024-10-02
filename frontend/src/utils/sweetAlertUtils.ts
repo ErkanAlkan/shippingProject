@@ -23,7 +23,7 @@ export const showErrorAlert = (message = 'An error occurred') => {
 };
 
 export const showSuccessAlert = (message = 'Operation successful') => {
-  Swal.fire({
+  return Swal.fire({
     title: 'Success!',
     text: message,
     icon: 'success',

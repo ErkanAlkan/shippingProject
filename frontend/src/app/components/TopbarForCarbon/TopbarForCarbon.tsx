@@ -78,7 +78,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
       departureDate: null,
       arrivalDate: null,
       vessel: "",
-      draftLevel: null,
+      draftLevel: 10,
     },
   });
 
