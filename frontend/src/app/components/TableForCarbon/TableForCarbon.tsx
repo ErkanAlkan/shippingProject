@@ -51,7 +51,10 @@ const TableForCarbon: React.FC<TableProps> = ({ combinedContent }) => {
             </thead>
             <tbody>
               {combinedContent.map((row, index) => (
-                <tr key={index}>
+                <tr 
+                  key={index} 
+                  className={index === 2 ? styles.highlightedRow : undefined}
+                >
                   <td>{row.speed}</td>
                   <td>{row.totalTime}</td>
                   <td>{row.totalDistance}</td>
@@ -71,5 +74,6 @@ const TableForCarbon: React.FC<TableProps> = ({ combinedContent }) => {
     </div>
   );
 };
+
 
 export default TableForCarbon;

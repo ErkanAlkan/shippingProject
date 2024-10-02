@@ -55,4 +55,9 @@
     padding: 20px;
     text-align: center;
   }
+
+  .highlightedRow {
+    background-color: yellow;
+    font-weight: bold;
+  }
   
