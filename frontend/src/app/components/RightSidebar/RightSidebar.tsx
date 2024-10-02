@@ -25,14 +25,14 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
       <button
         className={`${styles.iconButton} ${showTopbar ? styles.on : ""}`}
         onClick={onToggleTopbar}
-        title="Toggle Topbar"
+        title="Toggle Route Bar"
       >
         <FontAwesomeIcon icon={faEye} size="2x" />
       </button>
       <button
         className={`${styles.iconButton} ${showTopbarForCarbon ? styles.on : ""}`}
         onClick={onToggleTopbarForCarbon}
-        title="Toggle Topbar for Carbon"
+        title="Toggle Calculation Bar"
       >
         <FontAwesomeIcon icon={faCloud} size="2x" />
       </button>
