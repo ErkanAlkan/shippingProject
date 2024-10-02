@@ -8,6 +8,7 @@ import carbon from './routes/carbonRoutes/carbonRoutes';
 import vessel from './routes/vesselRoutes/vessel';
 import vesselVariable from './routes/vesselRoutes/vesselVariable';
 import authRoutes from './routes/authRoutes/authRoutes';
+import uniquePorts from './routes/portRoutes/portRoutes';
 
 dotenv.config();
 
@@ -21,8 +22,6 @@ const allowedOrigins = [
   'https://shipping-project-rho.vercel.app',
   process.env.CLIENT_URL,
 ];
-
-console.log("Allowed Origins:", allowedOrigins);
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -54,6 +53,7 @@ app.use('/api/carbon', carbon);
 app.use('/api/vessel', vessel);
 app.use('/api/vessel-variable', vesselVariable);
 app.use('/api/auth', authRoutes);
+app.use('/api/unique-ports', uniquePorts);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Shipping Project API');

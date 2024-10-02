@@ -27,12 +27,10 @@ if (
 }
 
 passport.serializeUser((user: any, done) => {
-  console.log('Serializing user:', user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id: number, done) => {
-  console.log('Deserializing user with ID:', id);
   try {
     const user = await prisma.user.findUnique({ where: { id } });
     if (user) {
@@ -157,9 +155,6 @@ router.post("/logout", (req: Request, res: Response) => {
 });
 
 router.get("/session", (req: Request, res: Response) => {
-  console.log("Session data:", req.session);
-  console.log("isAuthenticated:", req.isAuthenticated());
-  console.log("User data:", req.user);
   if (req.isAuthenticated() && req.user) {
     const user = req.user as User;
     res.status(200).json({ email: user.email });

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller, Control } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -18,44 +18,49 @@ interface TopBarFormData {
   destinationPort: string;
 }
 
-const portOptions = [
-  "Camden",
-  "Convent",
-  "Dongjiakou",
-  "Hedland",
-  "Kamsar",
-  "Monfalcone",
-  "Paradip",
-  "PDM",
-  "Qinhuangdao",
-  "San Lorenzo",
-];
-
-const middlePointOptions = ["panama", "suez", "capetown"];
-
-const validationSchema = Yup.object().shape({
-  originPort: Yup.string()
-    .required("Origin Port is required")
-    .oneOf(portOptions, "Select a valid port"),
-  middlePoint1: Yup.string().oneOf(
-    ["", ...middlePointOptions],
-    "Select a valid middle"
-  ),
-  middlePoint2: Yup.string().oneOf(
-    ["", ...middlePointOptions],
-    "Select a valid middle"
-  ),
-  destinationPort: Yup.string()
-    .required("Destination Port is required")
-    .oneOf(portOptions, "Select a valid port")
-    .test("not-same-as-origin", "Same as origin port", function (value) {
-      const { originPort } = this.parent;
-      return originPort !== value;
-    }),
-});
 
 const Topbar = () => {
   const { globalRouteData, setGlobalRouteData } = useRouteContext();
+  const [portOptions, setPortOptions] = useState<string[]>([]);
+  const [middlePointOptions, setMiddlePointOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchPorts = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-ports`);
+        setPortOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching port options:", error);
+        showErrorAlert("Failed to fetch ports");
+      }
+    };
+
+    const fetchMiddlePoints = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`);
+        setMiddlePointOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching middle points:", error);
+        showErrorAlert("Failed to fetch middle points");
+      }
+    };
+
+    fetchPorts();
+    fetchMiddlePoints();
+  }, []);
+
+  const validationSchema = Yup.object().shape({
+    originPort: Yup.string().required("Origin Port is required").oneOf(portOptions, "Select a valid port"),
+    middlePoint1: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
+    middlePoint2: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
+    destinationPort: Yup.string()
+      .required("Destination Port is required")
+      .oneOf(portOptions, "Select a valid port")
+      .test("not-same-as-origin", "Same as origin port", function (value) {
+        const { originPort } = this.parent;
+        return originPort !== value;
+      }),
+  });
 
   const {
     handleSubmit,
@@ -76,26 +81,24 @@ const Topbar = () => {
     if (globalRouteData.length > 0) {
       const firstPoint = globalRouteData[0];
       const lastPoint = globalRouteData[globalRouteData.length - 1];
-  
+
       setValue("originPort", firstPoint.origin || "");
       setValue("destinationPort", lastPoint.destination || "");
-  
+
       const middlePoints = globalRouteData.slice(1, globalRouteData.length - 1);
       let middlePoint1 = "";
       let middlePoint2 = "";
-  
+
       for (const point of middlePoints) {
         if (middlePointOptions.includes(point.origin) || middlePointOptions.includes(point.destination)) {
-          const matchedPoint = middlePointOptions.includes(point.origin)
-            ? point.origin
-            : point.destination;
-  
+          const matchedPoint = middlePointOptions.includes(point.origin) ? point.origin : point.destination;
+
           if (!middlePoint1) {
             middlePoint1 = matchedPoint;
-            setValue("middlePoint1", matchedPoint); 
+            setValue("middlePoint1", matchedPoint);
           } else if (!middlePoint2 && matchedPoint !== middlePoint1) {
             middlePoint2 = matchedPoint;
-            setValue("middlePoint2", matchedPoint); 
+            setValue("middlePoint2", matchedPoint);
             break;
           }
         }
@@ -105,7 +108,7 @@ const Topbar = () => {
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
-      showLoadingAlert('Fetching route data, please wait!');
+      showLoadingAlert("Fetching route data, please wait!");
       const response = await axios.post(`${API_BASE_URL}/api/ship/get-route`, {
         origin: data.originPort,
         destination: data.destinationPort,
@@ -117,13 +120,13 @@ const Topbar = () => {
     } catch (error) {
       Swal.close();
       console.error("Error fetching route data:", error);
-      showErrorAlert('Fetching route data failed!');
+      showErrorAlert("Fetching route data failed!");
     }
   };
 
   const renderInput = (name: keyof TopBarFormData, label: string, options: string[]) => {
     const placeholder = name === "originPort" || name === "destinationPort" ? "Select Port" : "Select Point";
-  
+
     return (
       <div className={styles.inputContainer}>
         <div className={styles.formGroup}>
@@ -141,15 +144,12 @@ const Topbar = () => {
                 />
               )}
             />
-            {errors[name] && (
-              <span className={styles.error}>{errors[name]?.message}</span>
-            )}
+            {errors[name] && <span className={styles.error}>{errors[name]?.message}</span>}
           </div>
         </div>
       </div>
     );
   };
-  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.topbar}>
