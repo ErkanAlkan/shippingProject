@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import styles from "./TopbarForCarbon.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
 import axios from "axios";
-import Swal from "sweetalert2";
+import { showWarningAlert } from "~/utils/sweetAlertUtils";
 import TableForCarbon from "../TableForCarbon/TableForCarbon";
 import { RouteData } from "../../../app/types/types";
 
@@ -130,12 +130,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
 
   const onSubmit = (data: TopbarForCarbonFormData) => {
     if (!totalDistance) {
-      Swal.fire({
-        icon: "warning",
-        title: "Route not selected",
-        text: "Please choose a route first!",
-        confirmButtonText: "OK",
-      });
+      showWarningAlert("Route not selected. Please choose a route first!");
       return;
     }
     const submissionData = {
