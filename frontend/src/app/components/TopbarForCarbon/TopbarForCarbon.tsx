@@ -9,7 +9,9 @@ import AutoComplete from "../AutoComplete/AutoComplete";
 import axios from "axios";
 import Swal from "sweetalert2";
 import TableForCarbon from "../TableForCarbon/TableForCarbon";
-import {RouteData} from '../../../app/types/types';
+import { RouteData } from "../../../app/types/types";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface TopbarForCarbonFormData {
   vessel: string;
@@ -25,8 +27,6 @@ interface TopbarForCarbonProps {
   totalDistance: number;
   globalRouteData: RouteData[];
 }
-
-
 
 const validationSchema = Yup.object().shape({
   vessel: Yup.string()
@@ -148,7 +148,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
     };
 
     axios
-      .post("/api/carbon/calculate-stats", submissionData)
+      .post(`${API_BASE_URL}/api/carbon/calculate-stats`, submissionData)
       .then((response) => {
         const { combinedContent } = response.data;
         setCombinedContent(combinedContent);
