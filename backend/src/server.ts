@@ -18,6 +18,7 @@ app.set('trust proxy', 1);
 
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://shipping-project-rho.vercel.app',
   process.env.CLIENT_URL,
 ];
 
