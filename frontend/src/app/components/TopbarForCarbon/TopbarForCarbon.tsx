@@ -7,7 +7,8 @@ import * as Yup from "yup";
 import styles from "./TopbarForCarbon.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
 import axios from "axios";
-import { showWarningAlert } from "~/utils/sweetAlertUtils";
+import { showWarningAlert, showLoadingAlert, showErrorAlert } from "~/utils/sweetAlertUtils";
+import Swal from "sweetalert2";
 import TableForCarbon from "../TableForCarbon/TableForCarbon";
 import { RouteData } from "../../../app/types/types";
 
@@ -141,16 +142,40 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
         selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
       totalDistance,
     };
-
+    showLoadingAlert("Doing the calculations, please wait!");
     axios
       .post(`${API_BASE_URL}/api/carbon/calculate-stats`, submissionData)
       .then((response) => {
         const { combinedContent } = response.data;
         setCombinedContent(combinedContent);
+        Swal.close();
       })
       .catch((error) => {
+        Swal.close();
         console.error("Error submitting data:", error);
+        showErrorAlert("Failed to submit data!");
       });
+  };
+
+  const formatDateTimeInput = (date: Date | null) => {
+    if (!date || isNaN(date.getTime())) {
+      return ""; // Return empty string if the date is invalid
+    }
+    return date.toISOString().slice(0, 16); // Return the formatted date
+  };
+
+  const handleDateChange = (value: string | undefined, fieldOnChange: (value: Date | null) => void) => {
+    if (!value) {
+      fieldOnChange(null); // If value is undefined or empty, set it to null
+      return;
+    }
+
+    const newDate = new Date(value);
+    if (!isNaN(newDate.getTime())) {
+      fieldOnChange(newDate); // Set valid date
+    } else {
+      fieldOnChange(null); // Clear invalid date
+    }
   };
 
   return (
@@ -273,8 +298,8 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
                   {...field}
                   type="datetime-local"
                   placeholder="Departure date and Time"
-                  value={field.value ? field.value.toISOString().slice(0, 16) : ""}
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                  value={formatDateTimeInput(field.value ?? null)} // Handle undefined by converting to null
+                  onChange={(e) => handleDateChange(e.target.value, field.onChange)} // Handle change with updated function
                   className={styles.input}
                 />
               )}
@@ -294,8 +319,8 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
                   {...field}
                   type="datetime-local"
                   placeholder="Arrival Date and Time"
-                  value={field.value ? field.value.toISOString().slice(0, 16) : ""}
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                  value={formatDateTimeInput(field.value ?? null)} // Handle undefined by converting to null
+                  onChange={(e) => handleDateChange(e.target.value, field.onChange)} // Handle change with updated function
                   className={styles.input}
                 />
               )}

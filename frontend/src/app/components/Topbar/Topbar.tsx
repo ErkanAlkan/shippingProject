@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import axios from "axios";
 import styles from "./Topbar.module.css";
 import AutoComplete from "../AutoComplete/AutoComplete";
+import { showErrorAlert, showLoadingAlert } from "~/utils/sweetAlertUtils";
+import Swal from "sweetalert2";
 import { useRouteContext } from "~/app/context/RouteContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -103,16 +105,19 @@ const Topbar = () => {
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
+      showLoadingAlert('Fetching route data, please wait!');
       const response = await axios.post(`${API_BASE_URL}/api/ship/get-route`, {
         origin: data.originPort,
         destination: data.destinationPort,
         middlePoints: [data.middlePoint1, data.middlePoint2].filter(Boolean),
       });
-
       const routeData = response.data;
       setGlobalRouteData(routeData);
+      Swal.close();
     } catch (error) {
+      Swal.close();
       console.error("Error fetching route data:", error);
+      showErrorAlert('Fetching route data failed!');
     }
   };
 
