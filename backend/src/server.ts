@@ -18,7 +18,7 @@ app.set('trust proxy', 1);
 
 const allowedOrigins = [
   'http://localhost:3000',
-  process.env.CLIENT_URL
+  process.env.CLIENT_URL,
 ];
 
 console.log("Allowed Origins:", allowedOrigins);
@@ -28,6 +28,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin!) || !origin) {
       callback(null, true);
     } else {
+      console.log(`Origin ${origin} not allowed by CORS`);
       callback(new Error('Not allowed by CORS'));
     }
   },

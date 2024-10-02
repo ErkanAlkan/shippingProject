@@ -36,7 +36,7 @@ passport.deserializeUser(async (id: number, done) => {
     if (user) {
       done(null, user);
     } else {
-      done(new Error('User not found'), null);
+      done(new Error("User not found"), null);
     }
   } catch (err) {
     done(err, null);
@@ -131,7 +131,6 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
-
 router.post("/logout", (req: Request, res: Response) => {
   req.logout((err: Error | null) => {
     if (err) {
@@ -148,10 +147,10 @@ router.post("/logout", (req: Request, res: Response) => {
   });
 });
 
-
-
 router.get("/session", (req: Request, res: Response) => {
   console.log("Session data:", req.session);
+  console.log("isAuthenticated:", req.isAuthenticated());
+  console.log("User data:", req.user);
   if (req.isAuthenticated() && req.user) {
     const user = req.user as User;
     res.status(200).json({ email: user.email });
@@ -177,7 +176,6 @@ router.post("/register", async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 router.get("/google/callback", passport.authenticate("google", { failureRedirect: "/login" }), (req, res) => {

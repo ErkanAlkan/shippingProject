@@ -35,6 +35,7 @@ const HomePage = () => {
         console.log("checkUser ~ response:", response);
         setUser(response.data);
       } catch (error) {
+        console.log("checkUser ~ error:", error);
         router.push("/auth/signin");
       }
     };

@@ -1,3 +1,22 @@
 {
-  "extends": "next/core-web-vitals"
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "extends": ["next/babel","next/core-web-vitals"],
+  "rules": {
+  },
+  "overrides": [
+    {
+      "files": ["*.mjs"],
+      "parser": "@babel/eslint-parser",
+      "parserOptions": {
+        "requireConfigFile": false,
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      }
+    }
+  ]
 }
