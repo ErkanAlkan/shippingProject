@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import { showLoadingAlert } from "../../../utils/sweetAlertUtils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log("API_BASE_URL:", API_BASE_URL);
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
