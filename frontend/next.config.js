@@ -6,7 +6,7 @@ dotenv.config();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
-    config.resolve.alias['~'] = path.resolve(__dirname, 'src');
+    config.resolve.alias['~'] = path.resolve('src'); // no need for __dirname in ESM
     return config;
   },
   env: {
