@@ -27,10 +27,12 @@ if (
 }
 
 passport.serializeUser((user: any, done) => {
+  console.log('Serializing user:', user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id: number, done) => {
+  console.log('Deserializing user with ID:', id);
   try {
     const user = await prisma.user.findUnique({ where: { id } });
     if (user) {
@@ -100,7 +102,7 @@ passport.use(
   )
 );
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", async (req: Request, res: Response, next) => {
   const { email, password } = req.body;
 
   try {
@@ -119,8 +121,14 @@ router.post("/login", async (req: Request, res: Response) => {
           return res.status(500).json({ message: "Internal server error" });
         }
 
-        console.log("User logged in successfully:", user);
-        return res.status(200).json({ id: user.id, email: user.email });
+        req.session.save((err) => {
+          if (err) {
+            console.error("Error saving session:", err);
+            return res.status(500).json({ message: "Internal server error" });
+          }
+          console.log("Session saved successfully.");
+          return res.status(200).json({ id: user.id, email: user.email });
+        });
       });
     } else {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -130,6 +138,7 @@ router.post("/login", async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 router.post("/logout", (req: Request, res: Response) => {
   req.logout((err: Error | null) => {
