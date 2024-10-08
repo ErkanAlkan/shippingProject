@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm, Controller, Control } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import axios from "axios";
@@ -8,6 +8,7 @@ import AutoComplete from "../AutoComplete/AutoComplete";
 import { showErrorAlert, showLoadingAlert } from "~/utils/sweetAlertUtils";
 import Swal from "sweetalert2";
 import { useRouteContext } from "~/app/context/RouteContext";
+import { usePortContext } from "~/app/context/PortContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,23 +19,40 @@ interface TopBarFormData {
   destinationPort: string;
 }
 
-
 const Topbar = () => {
   const { globalRouteData, setGlobalRouteData } = useRouteContext();
-  const [portOptions, setPortOptions] = useState<string[]>([]);
+  const {
+    portOptions,
+    selectedOriginPort,
+    setSelectedOriginPort,
+    selectedDestinationPort,
+    setSelectedDestinationPort,
+  } = usePortContext();
   const [middlePointOptions, setMiddlePointOptions] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchPorts = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-ports`);
-        setPortOptions(response.data);
-      } catch (error) {
-        console.error("Error fetching port options:", error);
-        showErrorAlert("Failed to fetch ports");
-      }
-    };
+  const portNames = portOptions.map((port) => port.origin);
 
+  const handleOriginChange = async (value: string) => {
+    if (value === "") {
+      setSelectedOriginPort(null);
+    } else {
+      setSelectedOriginPort(value);
+    }
+    await trigger("originPort");
+    console.log("handleOriginChange ~ trigger:", trigger);
+  };
+    
+  
+  const handleDestinationChange = async (value: string) => {
+    if (value === "") {
+      setSelectedDestinationPort(null);
+    } else {
+      setSelectedDestinationPort(value);
+    }
+    await trigger("destinationPort");
+  };
+
+  useEffect(() => {
     const fetchMiddlePoints = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`);
@@ -45,17 +63,16 @@ const Topbar = () => {
       }
     };
 
-    fetchPorts();
     fetchMiddlePoints();
   }, []);
 
   const validationSchema = Yup.object().shape({
-    originPort: Yup.string().required("Origin Port is required").oneOf(portOptions, "Select a valid port"),
+    originPort: Yup.string().required("Origin Port is required").oneOf(portNames, "Select a valid port"),
     middlePoint1: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
     middlePoint2: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
     destinationPort: Yup.string()
       .required("Destination Port is required")
-      .oneOf(portOptions, "Select a valid port")
+      .oneOf(portNames, "Select a valid port")
       .test("not-same-as-origin", "Same as origin port", function (value) {
         const { originPort } = this.parent;
         return originPort !== value;
@@ -66,6 +83,7 @@ const Topbar = () => {
     handleSubmit,
     control,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<TopBarFormData>({
     resolver: yupResolver(validationSchema),
@@ -76,6 +94,21 @@ const Topbar = () => {
       destinationPort: "",
     },
   });
+  useEffect(() => {
+    console.log("useEffect ~ selectedOriginPort:", selectedOriginPort);
+    if (selectedOriginPort) {
+      setValue("originPort", selectedOriginPort);
+      trigger("originPort");
+    }
+  }, [selectedOriginPort, setValue, trigger]);
+  
+  useEffect(() => {
+    console.log("useEffect ~ selectedDestinationPort:", selectedDestinationPort);
+    if (selectedDestinationPort) {
+      setValue("destinationPort", selectedDestinationPort);
+      trigger("destinationPort");
+    }
+  }, [selectedDestinationPort, setValue, trigger]);
 
   useEffect(() => {
     if (globalRouteData.length > 0) {
@@ -124,7 +157,12 @@ const Topbar = () => {
     }
   };
 
-  const renderInput = (name: keyof TopBarFormData, label: string, options: string[]) => {
+  const renderInput = (
+    name: keyof TopBarFormData,
+    label: string,
+    options: string[],
+    onSelectionChangeHandler: (value: string) => void
+  ) => {
     const placeholder = name === "originPort" || name === "destinationPort" ? "Select Port" : "Select Point";
 
     return (
@@ -134,13 +172,16 @@ const Topbar = () => {
           <div className={styles.inputField}>
             <Controller
               name={name}
-              control={control as Control<TopBarFormData>}
+              control={control}
               render={({ field }) => (
                 <AutoComplete
                   {...field}
-                  control={control as Control<TopBarFormData>}
                   placeholder={placeholder}
                   options={options}
+                  onSelectionChange={(value) => {
+                    field.onChange(value);
+                    onSelectionChangeHandler(value);
+                  }}
                 />
               )}
             />
@@ -154,12 +195,12 @@ const Topbar = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.topbar}>
       <div className={styles.row}>
-        {renderInput("originPort", "Origin Port", portOptions)}
-        {renderInput("destinationPort", "Destination Port", portOptions)}
+        {renderInput("originPort", "Origin Port", portNames, handleOriginChange)}
+        {renderInput("destinationPort", "Destination Port", portNames, handleDestinationChange)}
       </div>
       <div className={styles.row}>
-        {renderInput("middlePoint1", "Middle Point 1", middlePointOptions)}
-        {renderInput("middlePoint2", "Middle Point 2", middlePointOptions)}
+        {renderInput("middlePoint1", "Middle Point 1", middlePointOptions, () => {})}
+        {renderInput("middlePoint2", "Middle Point 2", middlePointOptions, () => {})}
       </div>
       <button type="submit" className={styles.submitButton}>
         Run

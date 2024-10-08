@@ -38,7 +38,10 @@ const validationSchema = Yup.object().shape({
     .when("inputType", {
       is: (value: number) => value === 0,
       then: (schema) =>
-        schema.required("Total Time is required").min(0, "Total Time must be greater than or equal to 0").max(99, "Total Time must be smaller than or equal to 99"),
+        schema
+          .required("Total Time is required")
+          .min(0, "Total Time must be greater than or equal to 0")
+          .max(99, "Total Time must be smaller than or equal to 99"),
       otherwise: (schema) => schema.nullable(),
     }),
   averageSpeed: Yup.number()
@@ -46,7 +49,10 @@ const validationSchema = Yup.object().shape({
     .when("inputType", {
       is: (value: number) => value === 1,
       then: (schema) =>
-        schema.required("Average Speed is required").min(0, "Average Speed must be greater than or equal to 0").max(20, "Average Speed must be smaller than or equal to 20"),
+        schema
+          .required("Average Speed is required")
+          .min(0, "Average Speed must be greater than or equal to 0")
+          .max(20, "Average Speed must be smaller than or equal to 20"),
       otherwise: (schema) => schema.nullable(),
     }),
   departureDate: Yup.date()
@@ -65,7 +71,10 @@ const validationSchema = Yup.object().shape({
       otherwise: (schema) => schema.nullable(),
     }),
   inputType: Yup.number().required(),
-  draftLevel: Yup.number().nullable().min(1, "Draft Level must be greater than or equal to 1").max(20, "Draft level must be smaller than or equal to 20"),
+  draftLevel: Yup.number()
+    .nullable()
+    .min(1, "Draft Level must be greater than or equal to 1")
+    .max(20, "Draft level must be smaller than or equal to 20"),
 });
 
 const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
@@ -178,9 +187,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
             <Controller
               name="vessel"
               control={control}
-              render={({ field }) => (
-                <AutoComplete {...field} control={control} placeholder="Select Vessel" options={vessels} />
-              )}
+              render={({ field }) => <AutoComplete {...field} placeholder="Select Vessel" options={vessels} />}
             />
           </div>
           <label>Draft:</label>

@@ -9,9 +9,11 @@ export const getUniqueMiddlePoints = async (): Promise<string[]> => {
         },
         select: {
             origin: true,
+            destination: true
         },
     });
-    const uniqueMiddlePoints = Array.from(new Set(points.map(points => points.origin)));
+    const allPoints = points.flatMap(point => [point.origin, point.destination]);
+    const uniqueMiddlePoints = Array.from(new Set(allPoints));
     uniqueMiddlePoints.sort((a, b) => a.localeCompare(b));
 
     return uniqueMiddlePoints;

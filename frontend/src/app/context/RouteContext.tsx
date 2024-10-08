@@ -5,13 +5,14 @@ import { RouteData } from '~/app/types/types';
 
 interface RouteContextType {
   globalRouteData: RouteData[];
-  setGlobalRouteData: (data: RouteData[]) => void; 
+  setGlobalRouteData: (data: RouteData[]) => void;
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined);
 
 export const RouteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [globalRouteData, setGlobalRouteData] = useState<RouteData[]>([]);
+  console.log("globalRouteData:", globalRouteData);
 
   return (
     <RouteContext.Provider value={{ globalRouteData, setGlobalRouteData }}>

@@ -5,13 +5,16 @@ import styles from "./AutoComplete.module.css";
 interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T> {
   placeholder: string;
   options: string[];
+  value: string | undefined;
+  onChange: (value: string) => void;
+  onBlur: () => void;
   onSelectionChange?: (value: string) => void;
 }
 
+
 const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
-  ({ placeholder, options, name, control, rules, defaultValue, onSelectionChange }, ref) => {
-    const { field } = useController<any>({ name, control, rules, defaultValue });
-    const [inputValue, setInputValue] = useState<string>(field.value ? String(field.value) : "");
+  ({ placeholder, options, name, value, onChange, onBlur, defaultValue, onSelectionChange }, ref) => {
+    const [inputValue, setInputValue] = useState<string>(value ? String(value) : "");
     const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
     const [showOptions, setShowOptions] = useState(false);
 
@@ -20,30 +23,39 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
     }, [options]);
 
     useEffect(() => {
-      setInputValue(field.value ? String(field.value) : "");
-    }, [field.value]);
+      if (value !== inputValue) {
+        setInputValue(value ? String(value) : "");
+      }
+    }, [value, inputValue]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+
+      if (value === "") {
+        onChange("");
+        if (onSelectionChange) {
+          onSelectionChange("");
+        }
+      }
       setInputValue(value);
       setFilteredOptions(options.filter((option) => option.toLowerCase().includes(value.toLowerCase())));
       setShowOptions(true);
-      field.onChange(value);
+      onChange(value);
     };
 
     const handleSelect = (option: string) => {
       setInputValue(option);
       setFilteredOptions([]);
       setShowOptions(false);
-      field.onChange(option);
+      onChange(option); // Notify react-hook-form about the selected value
       if (onSelectionChange) {
-        onSelectionChange(option);
+        onSelectionChange(option); // Optionally notify parent component (if needed)
       }
     };
 
     const handleBlur = () => {
       setShowOptions(false);
-      field.onBlur();
+      onBlur(); // Notify react-hook-form about the blur event
     };
 
     return (
@@ -55,7 +67,7 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
           onChange={handleChange}
           onFocus={() => setShowOptions(true)}
           onBlur={handleBlur}
-          className={`${styles.input}`}
+          className={styles.input}
           ref={ref}
         />
         {showOptions && filteredOptions.length > 0 && (

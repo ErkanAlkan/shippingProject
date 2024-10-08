@@ -6,6 +6,7 @@ import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 import { RouteProvider } from "~/app/context/RouteContext";
 import { LayerProvider } from "~/app/context/LayerContext";
 import { TopbarProvider } from "~/app/context/TopbarContext";
+import { PortProvider } from "~/app/context/PortContext";
 
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,12 +17,14 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
     <RouteProvider>
       <LayerProvider>
         <TopbarProvider>
-          <div className={styles.clientRoot}>
-            {showSidebar && <Sidebar />}
-            <div className={styles.mainContent}>
-              <div className={styles.content}>{children}</div>
+          <PortProvider>
+            <div className={styles.clientRoot}>
+              {showSidebar && <Sidebar />}
+              <div className={styles.mainContent}>
+                <div className={styles.content}>{children}</div>
+              </div>
             </div>
-          </div>
+          </PortProvider>
         </TopbarProvider>
       </LayerProvider>
     </RouteProvider>
