@@ -159,22 +159,22 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
 
   const formatDateTimeInput = (date: Date | null) => {
     if (!date || isNaN(date.getTime())) {
-      return ""; // Return empty string if the date is invalid
+      return "";
     }
-    return date.toISOString().slice(0, 16); // Return the formatted date
+    return date.toISOString().slice(0, 16);
   };
 
   const handleDateChange = (value: string | undefined, fieldOnChange: (value: Date | null) => void) => {
     if (!value) {
-      fieldOnChange(null); // If value is undefined or empty, set it to null
+      fieldOnChange(null);
       return;
     }
 
     const newDate = new Date(value);
     if (!isNaN(newDate.getTime())) {
-      fieldOnChange(newDate); // Set valid date
+      fieldOnChange(newDate);
     } else {
-      fieldOnChange(null); // Clear invalid date
+      fieldOnChange(null);
     }
   };
 
@@ -317,8 +317,8 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
                   {...field}
                   type="datetime-local"
                   placeholder="Arrival Date and Time"
-                  value={formatDateTimeInput(field.value ?? null)} // Handle undefined by converting to null
-                  onChange={(e) => handleDateChange(e.target.value, field.onChange)} // Handle change with updated function
+                  value={formatDateTimeInput(field.value ?? null)}
+                  onChange={(e) => handleDateChange(e.target.value, field.onChange)}
                   className={styles.input}
                 />
               )}
@@ -327,11 +327,11 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
         ) : null}
 
         <div className={styles.buttonContainer}>
-          <button type="button" onClick={handleReset} className={`${styles.button} ${styles.buttonReset}`}>
-            Reset
-          </button>
           <button type="submit" className={`${styles.button} ${styles.buttonCalculate}`}>
             Calculate
+          </button>
+          <button type="button" onClick={handleReset} className={`${styles.button} ${styles.buttonReset}`}>
+            Reset
           </button>
         </div>
       </form>
