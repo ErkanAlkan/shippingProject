@@ -61,13 +61,18 @@ const HomePage = () => {
           showObservedTrackLayer={showCycloneLayers}
           showForecastTrackLayer={showCycloneLayers}
         />
-        {showTopbarForCarbon && totalDistance && (
-          <div className={styles.visible}>
-            <TopbarForCarbon totalDistance={totalDistance} globalRouteData={globalRouteData} />
-          </div>
-        )}
-        <div className={showTopbar ? styles.visible : styles.hidden}>
-          <Topbar />
+        <div className={styles.flexContainer}>
+          {showTopbar && (
+            <div className={styles.topbarContainer}>
+              <Topbar />
+            </div>
+          )}
+
+          {showTopbarForCarbon && totalDistance && (
+            <div className={styles.topbarForCarbonContainer}>
+              <TopbarForCarbon totalDistance={totalDistance} globalRouteData={globalRouteData} />
+            </div>
+          )}
         </div>
         <RightSidebar
           onToggleTopbar={toggleTopbar}

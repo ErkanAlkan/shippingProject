@@ -11,8 +11,11 @@ import "sweetalert2/dist/sweetalert2.min.css";
 
 import greenDot from "/public/leaflet/green-dot.png";
 import redDot from "/public/leaflet/red-dot.png";
-import blueDot from "/public/leaflet/blue-dot.png";
 import portIcon from "/public/leaflet/port-icon.png";
+import blueDot from "/public/leaflet/blue-dot.png";
+import greenVessel from "/public/leaflet/green-vessel.png";
+import redVessel from "/public/leaflet/red-vessel.png";
+import portAnchor from "/public/leaflet/port-anchor.png";
 
 import ForecastConeLayer from "../CycloneLayer/ForecastCone";
 import ObservedTrackLayer from "../CycloneLayer/ObservedTrack";
@@ -52,12 +55,12 @@ const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
       }).addTo(map);
 
       geodesicPolyline.on("click", (e: any) => {
-        const lastPoint = globalRouteData[globalRouteData.length - 1]; // Get the last point
-        const totalDistance = lastPoint ? lastPoint.cumulative_dist : "0.00"; // Use the last point's cumulative distance
+        const lastPoint = globalRouteData[globalRouteData.length - 1];
+        const totalDistance = lastPoint ? lastPoint.cumulative_dist : "0.00";
 
         L.popup()
           .setLatLng(e.latlng)
-          .setContent(`<div><strong>Total Cumulative Distance:</strong> ${totalDistance} nm</div>`)
+          .setContent(`<div><strong>Total Total Distance:</strong> ${totalDistance} nm</div>`)
           .openOn(map);
       });
 
@@ -98,14 +101,16 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const [intersectionPoint, setIntersectionPoint] = useState<LatLngTuple | null>(null);
   const [forecastConeData, setForecastConeData] = useState<any>(null);
   const [observedTrackData, setObservedTrackData] = useState<any>(null);
+  const [isOriginPopupOpen, setIsOriginPopupOpen] = useState(false);
+  const [isDestinationPopupOpen, setIsDestinationPopupOpen] = useState(false);
 
   const FirstIcon = icon({
-    iconUrl: greenDot.src,
+    iconUrl: greenVessel.src,
     iconSize: [25, 25],
   });
 
   const LastIcon = icon({
-    iconUrl: redDot.src,
+    iconUrl: redVessel.src,
     iconSize: [25, 25],
   });
 
@@ -115,23 +120,28 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   });
 
   const PortIcon = icon({
-    iconUrl: portIcon.src,
+    iconUrl: portAnchor.src,
     iconSize: [20, 20],
   });
 
   useEffect(() => {
     if (globalRouteData && globalRouteData.length > 0) {
-      const adjustedCoordinates: LatLngTuple[] = [];
+      const newAdjustedCoordinates: LatLngTuple[] = [];
 
       globalRouteData.forEach((point) => {
         const lat = parseFloat(point.latitude);
         const lon = parseFloat(point.longitude);
-        const adjustedCoords = handleDateLineCrossing(adjustedCoordinates[adjustedCoordinates.length - 1], [lat, lon]);
-        adjustedCoordinates.push(adjustedCoords);
+        const adjustedCoords = handleDateLineCrossing(newAdjustedCoordinates[newAdjustedCoordinates.length - 1], [
+          lat,
+          lon,
+        ]);
+        newAdjustedCoordinates.push(adjustedCoords);
       });
 
-      setAdjustedCoordinates(adjustedCoordinates);
-      setCenter(calculateMeanLatLon(adjustedCoordinates));
+      setAdjustedCoordinates(newAdjustedCoordinates);
+      setCenter(calculateMeanLatLon(newAdjustedCoordinates));
+    } else {
+      setAdjustedCoordinates([]);
     }
   }, [globalRouteData]);
 
@@ -264,7 +274,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const calculateMeanLatLon = (coordinates: LatLngTuple[]): LatLngTuple => {
     const meanLat = coordinates.reduce((sum, coord) => sum + coord[0], 0) / coordinates.length;
     const meanLon = coordinates.reduce((sum, coord) => sum + coord[1], 0) / coordinates.length;
-  
+
     return [meanLat, meanLon];
   };
 
@@ -275,6 +285,22 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       setSelectedOriginPort(port);
     } else if (!selectedDestinationPort || selectedDestinationPort === "") {
       setSelectedDestinationPort(port);
+    }
+  };
+
+  const handlePopupOpen = (index: number) => {
+    if (index === 0) {
+      setIsOriginPopupOpen(true);
+    } else if (index === adjustedCoordinates.length - 1) {
+      setIsDestinationPopupOpen(true);
+    }
+  };
+
+  const handlePopupClose = (index: number) => {
+    if (index === 0) {
+      setIsOriginPopupOpen(false);
+    } else if (index === adjustedCoordinates.length - 1) {
+      setIsDestinationPopupOpen(false);
     }
   };
 
@@ -319,18 +345,52 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       {showForecastTrackLayer && <ForecastTrackLayer />}
       {adjustedCoordinates.map((position, index) => (
         <Marker
-        key={index}
-        position={position}
-        icon={index === 0 ? FirstIcon : index === adjustedCoordinates.length - 1 ? LastIcon : MiddleIcon}
-      >
-        <Popup>
-          <div>
-            Point: {index + 1} <br />
-            Latitude: {position[0]}, Longitude: {position[1]} <br />
-            Cumulative Distance: {globalRouteData[index]?.cumulative_dist || "N/A"} nm
-          </div>
-        </Popup>
-      </Marker>
+          key={index}
+          position={position}
+          icon={index === 0 ? FirstIcon : index === adjustedCoordinates.length - 1 ? LastIcon : MiddleIcon}
+          eventHandlers={{
+            popupopen: () => handlePopupOpen(index),
+            popupclose: () => handlePopupClose(index),
+          }}
+        >
+          {index === 0 && !isOriginPopupOpen && globalRouteData.length > 0 && (
+            <Tooltip permanent>{globalRouteData[0]?.origin}</Tooltip>
+          )}
+          {index === adjustedCoordinates.length - 1 && !isDestinationPopupOpen && globalRouteData.length > 0 && (
+            <Tooltip permanent>
+              {globalRouteData[globalRouteData.length - 1]?.destination} <br />
+              Total Distance:{" "}
+              {globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== null &&
+              globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== undefined
+                ? globalRouteData[globalRouteData.length - 1].cumulative_dist.toString()
+                : "N/A"}{" "}
+              nm
+            </Tooltip>
+          )}
+
+          <Popup>
+            <div>
+              Point: {index + 1} <br />
+              Latitude: {position[0]}, Longitude: {position[1]} <br />
+              {index === 0 && globalRouteData?.length > 0 && (
+                <>
+                  Origin Port: {globalRouteData[0]?.origin} <br />
+                </>
+              )}
+              {index === adjustedCoordinates.length - 1 && globalRouteData?.length > 0 && (
+                <>
+                  Destination Port: {globalRouteData[globalRouteData.length - 1]?.destination} <br />
+                  Cumulative Distance:{" "}
+                  {globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== null &&
+                  globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== undefined
+                    ? globalRouteData[globalRouteData.length - 1].cumulative_dist.toString()
+                    : "N/A"}{" "}
+                  nm
+                </>
+              )}
+            </div>
+          </Popup>
+        </Marker>
       ))}
       {adjustedCoordinates.length > 1 && <GeodesicPolyline positions={adjustedCoordinates} />}
       {intersectionPoint ? (

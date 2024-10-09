@@ -39,10 +39,8 @@ const Topbar = () => {
       setSelectedOriginPort(value);
     }
     await trigger("originPort");
-    console.log("handleOriginChange ~ trigger:", trigger);
   };
-    
-  
+
   const handleDestinationChange = async (value: string) => {
     if (value === "") {
       setSelectedDestinationPort(null);
@@ -50,6 +48,18 @@ const Topbar = () => {
       setSelectedDestinationPort(value);
     }
     await trigger("destinationPort");
+  };
+
+  const handleReset = () => {
+    reset({
+      originPort: "",
+      middlePoint1: "",
+      middlePoint2: "",
+      destinationPort: "",
+    });
+    setSelectedOriginPort(null);
+    setSelectedDestinationPort(null);
+    setGlobalRouteData([]);
   };
 
   useEffect(() => {
@@ -84,6 +94,7 @@ const Topbar = () => {
     control,
     setValue,
     trigger,
+    reset,
     formState: { errors },
   } = useForm<TopBarFormData>({
     resolver: yupResolver(validationSchema),
@@ -101,7 +112,7 @@ const Topbar = () => {
       trigger("originPort");
     }
   }, [selectedOriginPort, setValue, trigger]);
-  
+
   useEffect(() => {
     console.log("useEffect ~ selectedDestinationPort:", selectedDestinationPort);
     if (selectedDestinationPort) {
@@ -202,9 +213,14 @@ const Topbar = () => {
         {renderInput("middlePoint1", "Middle Point 1", middlePointOptions, () => {})}
         {renderInput("middlePoint2", "Middle Point 2", middlePointOptions, () => {})}
       </div>
-      <button type="submit" className={styles.submitButton}>
-        Run
-      </button>
+      <div className={styles.buttonRow}>
+        <button type="submit" className={styles.submitButton}>
+          Run
+        </button>
+        <button type="button" className={styles.resetButton} onClick={handleReset}>
+          Reset
+        </button>
+      </div>
     </form>
   );
 };

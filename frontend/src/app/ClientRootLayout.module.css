@@ -32,3 +32,29 @@
 .hidden {
   display: none;
 }
+
+.flexContainer {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 590px;
+  z-index: 505
+}
+
+.topbarContainer {
+  width: 100%;
+  max-width: 600px;
+}
+
+.topbarForCarbonContainer {
+  width: 100%;
+  max-width: 600px;
+  background-color: #f8f8f8;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}

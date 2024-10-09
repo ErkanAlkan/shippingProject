@@ -47,15 +47,15 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
       setInputValue(option);
       setFilteredOptions([]);
       setShowOptions(false);
-      onChange(option); // Notify react-hook-form about the selected value
+      onChange(option);
       if (onSelectionChange) {
-        onSelectionChange(option); // Optionally notify parent component (if needed)
+        onSelectionChange(option);
       }
     };
 
     const handleBlur = () => {
       setShowOptions(false);
-      onBlur(); // Notify react-hook-form about the blur event
+      onBlur();
     };
 
     return (
