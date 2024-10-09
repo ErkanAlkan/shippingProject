@@ -4,6 +4,11 @@
   margin: 0 5px;
 }
 
+.inputWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .input {
   width: 100%;
   padding: 8px 12px;
@@ -42,4 +47,20 @@
 
 .option:hover {
   background-color: #f0f0f0;
+}
+
+.clearButton {
+  position: absolute;
+  right: 10px; /* Adjust as needed */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust vertical position */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin: 0;
+}
+
+.clearButton:focus {
+  outline: none; /* Remove outline for better UI */
 }

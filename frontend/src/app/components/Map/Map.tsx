@@ -103,6 +103,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const [observedTrackData, setObservedTrackData] = useState<any>(null);
   const [isOriginPopupOpen, setIsOriginPopupOpen] = useState(false);
   const [isDestinationPopupOpen, setIsDestinationPopupOpen] = useState(false);
+  const [showPopups, setShowPopups] = useState(true);
 
   const FirstIcon = icon({
     iconUrl: greenVessel.src,
@@ -126,6 +127,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
 
   useEffect(() => {
     if (globalRouteData && globalRouteData.length > 0) {
+      setShowPopups(false);
       const newAdjustedCoordinates: LatLngTuple[] = [];
 
       globalRouteData.forEach((point) => {
@@ -279,8 +281,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   };
 
   const handlePortClick = (port: string) => {
-    console.log("handlePortClick ~ selectedOriginPort:", selectedOriginPort);
-    console.log("handlePortClick ~ selectedDestinationPort:", selectedDestinationPort);
+    setShowPopups(true);
     if (!selectedOriginPort || selectedOriginPort === "") {
       setSelectedOriginPort(port);
     } else if (!selectedDestinationPort || selectedDestinationPort === "") {
@@ -332,12 +333,14 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
             click: () => handlePortClick(port.origin),
           }}
         >
-          <Popup>
-            <div>
-              <strong>{port.origin}</strong> <br />
-              Latitude: {port.latitude}, Longitude: {port.longitude}
-            </div>
-          </Popup>
+          {showPopups && (
+            <Popup>
+              <div>
+                <strong>{port.origin}</strong> <br />
+                Latitude: {port.latitude}, Longitude: {port.longitude}
+              </div>
+            </Popup>
+          )}
         </Marker>
       ))}
       {showForecastConeLayer && <ForecastConeLayer onDataLoad={handleForecastConeDataLoad} />}
@@ -359,7 +362,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
           {index === adjustedCoordinates.length - 1 && !isDestinationPopupOpen && globalRouteData.length > 0 && (
             <Tooltip permanent>
               {globalRouteData[globalRouteData.length - 1]?.destination} <br />
-              Total Distance:{" "}
+              Total Dist:{" "}
               {globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== null &&
               globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== undefined
                 ? globalRouteData[globalRouteData.length - 1].cumulative_dist.toString()

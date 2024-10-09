@@ -1,6 +1,7 @@
 import React, { useState, useEffect, forwardRef } from "react";
-import { useController, UseControllerProps, FieldValues } from "react-hook-form";
+import { UseControllerProps, FieldValues } from "react-hook-form";
 import styles from "./AutoComplete.module.css";
+import clearIcon from "/public/leaflet/clear-icon.png";
 
 interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T> {
   placeholder: string;
@@ -10,7 +11,6 @@ interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T>
   onBlur: () => void;
   onSelectionChange?: (value: string) => void;
 }
-
 
 const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
   ({ placeholder, options, name, value, onChange, onBlur, defaultValue, onSelectionChange }, ref) => {
@@ -58,18 +58,33 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
       onBlur();
     };
 
+    const clearInput = () => {
+      setInputValue("");
+      onChange("");
+      if (onSelectionChange) {
+        onSelectionChange("");
+      }
+    };
+
     return (
       <div className={styles.autocomplete}>
-        <input
-          type="text"
-          placeholder={placeholder}
-          value={inputValue}
-          onChange={handleChange}
-          onFocus={() => setShowOptions(true)}
-          onBlur={handleBlur}
-          className={styles.input}
-          ref={ref}
-        />
+        <div className={styles.inputWrapper}>
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={inputValue}
+            onChange={handleChange}
+            onFocus={() => setShowOptions(true)}
+            onBlur={handleBlur}
+            className={styles.input}
+            ref={ref}
+          />
+          {inputValue && (
+            <button type="button" className={styles.clearButton} onClick={clearInput}>
+              <img src={clearIcon.src} alt="Clear" className={styles.clearIcon} width={18} height={18} />
+            </button>
+          )}
+        </div>
         {showOptions && filteredOptions.length > 0 && (
           <ul className={styles.options}>
             {filteredOptions.map((option, index) => (
