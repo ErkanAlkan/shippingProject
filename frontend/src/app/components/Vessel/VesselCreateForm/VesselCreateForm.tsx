@@ -5,10 +5,12 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import axios from "axios";
-import Swal from "sweetalert2";
+import { Form } from "react-bootstrap";
+import { showErrorAlert, showSuccessAlert } from "~/utils/sweetAlertUtils";
 import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const hotelLoadTypes = ["VLSFO", "LSIFO"];
 
 const validationSchema = Yup.object().shape({
   imo: Yup.number().required("IMO is required"),
@@ -51,25 +53,11 @@ const VesselForm = () => {
     console.log("data:", data);
     try {
       const response = await axios.post(`${API_BASE_URL}/api/vessel/create-vessel`, { ...data });
-      const vesselData = response.data;
-      console.log("vesselData:", vesselData);
-      Swal.fire({
-        title: "Success",
-        text: "Vessel is created successfully",
-        icon: "success",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#3085d6",
-      }).then(() => {
+      showSuccessAlert("Vessel is created successfully").then(() => {
         router.push("/vessel");
       });
     } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: "An error occurred",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#3085d6",
-      });
+      showErrorAlert("An error occurred while creating vessel!");
       console.error("Error fetching route data:", error);
     }
   };
@@ -136,13 +124,16 @@ const VesselForm = () => {
               name="hotel_load_type"
               control={control}
               render={({ field }) => (
-                <input
-                  type="text"
-                  className="form-control"
-                  {...field}
-                  placeholder="Hotel Load Type"
-                  value={field.value ?? ""}
-                />
+                <Form.Select {...field} value={field.value ?? ""} isInvalid={!!errors.hotel_load_type}>
+                  <option value="" disabled hidden>
+                    Select Hotel Load Type
+                  </option>
+                  {hotelLoadTypes.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </Form.Select>
               )}
             />
             {errors.hotel_load_type && <div className="text-danger">{errors.hotel_load_type.message}</div>}

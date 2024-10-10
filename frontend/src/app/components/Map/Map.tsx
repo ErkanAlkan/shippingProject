@@ -6,8 +6,7 @@ import { useRouteContext } from "~/app/context/RouteContext";
 import { usePortContext } from "~/app/context/PortContext";
 import "leaflet/dist/leaflet.css";
 import "leaflet.geodesic";
-import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
+import { showWarningAlert} from "~/utils/sweetAlertUtils";
 
 import greenDot from "/public/leaflet/green-dot.png";
 import redDot from "/public/leaflet/red-dot.png";
@@ -60,7 +59,7 @@ const GeodesicPolyline: React.FC<GeodesicPolylineProps> = ({ positions }) => {
 
         L.popup()
           .setLatLng(e.latlng)
-          .setContent(`<div><strong>Total Total Distance:</strong> ${totalDistance} nm</div>`)
+          .setContent(`<div><strong>Total Distance:</strong> ${totalDistance} nm</div>`)
           .openOn(map);
       });
 
@@ -225,13 +224,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
 
       if (intersection) {
         setIntersectionPoint(intersection);
-        Swal.fire({
-          title: "Warning",
-          text: "Your route intersects with a forecasted or observed area!",
-          icon: "warning",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
-        });
+        showWarningAlert("Your route intersects with a forecasted or observed area!");
       } else {
         setIntersectionPoint(null);
         console.log("No intersection found.");

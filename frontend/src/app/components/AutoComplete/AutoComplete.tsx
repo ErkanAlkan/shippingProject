@@ -2,6 +2,7 @@ import React, { useState, useEffect, forwardRef } from "react";
 import { UseControllerProps, FieldValues } from "react-hook-form";
 import styles from "./AutoComplete.module.css";
 import clearIcon from "/public/leaflet/clear-icon.png";
+import deleteIcon from "/public/icons/delete-icon.png";
 
 interface AutoCompleteProps<T extends FieldValues> extends UseControllerProps<T> {
   placeholder: string;
@@ -81,7 +82,7 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
           />
           {inputValue && (
             <button type="button" className={styles.clearButton} onClick={clearInput}>
-              <img src={clearIcon.src} alt="Clear" className={styles.clearIcon} width={18} height={18} />
+              <img src={deleteIcon.src} alt="Clear" className={styles.clearIcon} width={18} height={18} />
             </button>
           )}
         </div>
