@@ -368,6 +368,12 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
             <div>
               Point: {index + 1} <br />
               Latitude: {position[0]}, Longitude: {position[1]} <br />
+              Cumulative Distance:{" "}
+                  {globalRouteData[index]?.cumulative_dist !== null &&
+                  globalRouteData[index]?.cumulative_dist !== undefined
+                    ? globalRouteData[index].cumulative_dist.toString()
+                    : "N/A"}{" "}
+                  nm
               {index === 0 && globalRouteData?.length > 0 && (
                 <>
                   Origin Port: {globalRouteData[0]?.origin} <br />
