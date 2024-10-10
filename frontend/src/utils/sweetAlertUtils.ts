@@ -1,13 +1,17 @@
 import Swal, { SweetAlertResult } from 'sweetalert2';
 
-export const showLoadingAlert = (message = 'Fetching data, please wait...') => {
+export const showLoadingAlert = () => {
   Swal.fire({
-    title: 'Loading...',
-    text: message,
+    title: '',
+    html: '<div class="spinner"><div class="dot1"></div><div class="dot2"></div></div>',
+    showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
+    customClass: {
+      popup: 'loading-spinner'  // Use this custom class
+    },
     didOpen: () => {
-      Swal.showLoading();
+      // Loader is opened
     }
   });
 };

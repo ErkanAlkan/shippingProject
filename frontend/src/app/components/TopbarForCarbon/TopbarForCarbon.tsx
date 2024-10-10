@@ -142,7 +142,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
         selectedOption === "Arrival Date" || selectedOption === exactDatesOptions[0] ? data.arrivalDate : null,
       totalDistance,
     };
-    showLoadingAlert("Doing the calculations, please wait!");
+    showLoadingAlert();
     axios
       .post(`${API_BASE_URL}/api/carbon/calculate-stats`, submissionData)
       .then((response) => {

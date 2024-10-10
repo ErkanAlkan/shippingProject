@@ -56,7 +56,7 @@ const VesselVariableEditForm: React.FC<VesselVariableEditFormProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        showLoadingAlert('Fetching vessel data...');
+        showLoadingAlert();
         const response = await axios.get(`${API_BASE_URL}/api/vessel-variable/get-vessel-variable/${variableId}`);
         const data = response.data;
         setValue('current_vessel_speed', data.current_vessel_speed);

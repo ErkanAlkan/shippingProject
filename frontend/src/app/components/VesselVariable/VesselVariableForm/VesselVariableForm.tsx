@@ -5,7 +5,8 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import axios from "axios";
-import { showErrorAlert, showSuccessAlert } from "~/utils/sweetAlertUtils";
+import { showErrorAlert, showSuccessAlert, showLoadingAlert } from "~/utils/sweetAlertUtils";
+import Swal from "sweetalert2";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import AutoComplete from "../../AutoComplete/AutoComplete";
 
@@ -53,6 +54,7 @@ const VesselVariableForm: React.FC<VesselVariableFormProps> = ({ vesselId, onSuc
 
   const onSubmit = async (data: any) => {
     try {
+      showLoadingAlert();
       const response = await axios.post(`${API_BASE_URL}/api/vessel-variable/create-vessel-variable`, {
         vessel: {
           connect: {
@@ -61,12 +63,14 @@ const VesselVariableForm: React.FC<VesselVariableFormProps> = ({ vesselId, onSuc
         },
         ...data,
       });
+      Swal.close();
       showSuccessAlert("Vessel variables saved successfully").then((result) => {
         if (result.isConfirmed) {
           onSuccess();
         }
       });
     } catch (error) {
+      Swal.close();
       console.error("Error saving vessel variables:", error);
       showErrorAlert("Failed to save vessel variables!");
     }

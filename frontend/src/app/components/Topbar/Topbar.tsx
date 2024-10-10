@@ -152,7 +152,7 @@ const Topbar = () => {
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
-      showLoadingAlert("Fetching route data, please wait!");
+      showLoadingAlert();
       const response = await axios.post(`${API_BASE_URL}/api/ship/get-route`, {
         origin: data.originPort,
         destination: data.destinationPort,

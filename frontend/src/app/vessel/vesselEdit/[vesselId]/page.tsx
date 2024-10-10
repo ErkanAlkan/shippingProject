@@ -13,7 +13,7 @@ const VesselCardPage = () => {
 
   useEffect(() => {
     if (!vesselId) {
-      showLoadingAlert("Loading vessel data...");
+      showLoadingAlert();
     } else {
       Swal.close();
     }

@@ -19,7 +19,7 @@ export default function SignIn() {
     setError("");
 
     try {
-      showLoadingAlert("Signing in");
+      showLoadingAlert();
       const response = await axios.post(
         `${API_BASE_URL}/api/auth/login`,
         {

@@ -32,7 +32,7 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
   const [selectedVariableId, setSelectedVariableId] = useState<string | null>(null);
 
   const fetchVesselVariables = async () => {
-    showLoadingAlert('Fetching vessel variables...');
+    showLoadingAlert();
     try {
       const response = await axios.get(`${API_BASE_URL}/api/vessel-variable/get-vessel-variable-list/${vesselId}`);
       setVariables(response.data);

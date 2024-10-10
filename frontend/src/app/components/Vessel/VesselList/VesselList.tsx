@@ -43,7 +43,7 @@ const VesselList: React.FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchVessels = async () => {
-    showLoadingAlert("Fetching vessel data, please wait.");
+    showLoadingAlert();
     try {
       const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel-list`);
       

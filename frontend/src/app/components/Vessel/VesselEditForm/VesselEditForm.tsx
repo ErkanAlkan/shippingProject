@@ -88,7 +88,7 @@ const VesselEditForm = ({ vesselId }: { vesselId: string }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      showLoadingAlert("Fetching vessel data...");
+      showLoadingAlert();
       try {
         console.log(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
         const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
@@ -107,7 +107,7 @@ const VesselEditForm = ({ vesselId }: { vesselId: string }) => {
   }, [vesselId, setValue]);
 
   const onSubmit = async (data: VesselFormData) => {
-    showLoadingAlert("Updating vessel data...");
+    showLoadingAlert();
     try {
       await axios.put(`${API_BASE_URL}/api/vessel/update-vessel/${vesselId}`, data);
       showSuccessAlert("Vessel is updated successfully").then(() => {
