@@ -224,7 +224,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
 
       if (intersection) {
         setIntersectionPoint(intersection);
-        showWarningAlert("Your route intersects with a forecasted or observed area!");
+        showWarningAlert("Your route intersects with a forecasted area or observed track!");
       } else {
         setIntersectionPoint(null);
         console.log("No intersection found.");
@@ -373,7 +373,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
                   globalRouteData[index]?.cumulative_dist !== undefined
                     ? globalRouteData[index].cumulative_dist.toString()
                     : "N/A"}{" "}
-                  nm
+                  nm<br />
               {index === 0 && globalRouteData?.length > 0 && (
                 <>
                   Origin Port: {globalRouteData[0]?.origin} <br />
@@ -382,12 +382,6 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
               {index === adjustedCoordinates.length - 1 && globalRouteData?.length > 0 && (
                 <>
                   Destination Port: {globalRouteData[globalRouteData.length - 1]?.destination} <br />
-                  Cumulative Distance:{" "}
-                  {globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== null &&
-                  globalRouteData[globalRouteData.length - 1]?.cumulative_dist !== undefined
-                    ? globalRouteData[globalRouteData.length - 1].cumulative_dist.toString()
-                    : "N/A"}{" "}
-                  nm
                 </>
               )}
             </div>
