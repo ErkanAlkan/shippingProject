@@ -4,9 +4,11 @@ import axios from "axios";
 import L from "leaflet";
 import "leaflet.geodesic";
 
-interface ForecastTrackLayerProps {}
+interface ForecastTrackLayerProps {
+  onDataLoad: (hasData: boolean) => void;
+}
 
-const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
+const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = ({ onDataLoad }) => {
   const [forecastTrackData, setForecastTrackData] = useState<any>(null);
   const map = useMap();
 
@@ -37,20 +39,23 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
     polyline.bindPopup(popupContent);
   }, []);
 
-  const addGeodesicPolylines = useCallback((features: any[], map: L.Map) => {
-    features.forEach((feature: any) => {
-      const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]); // LatLng
-      const geodesicPolyline = L.geodesic(coordinates, {
-        weight: 2,
-        color: "red",
-        wrap: false,
-        dashArray: '5, 10',
-      }).addTo(map);
-      
-      bindPopup(feature, geodesicPolyline);
-      geodesicPolylines.current.push(geodesicPolyline);
-    });
-  }, [bindPopup]);
+  const addGeodesicPolylines = useCallback(
+    (features: any[], map: L.Map) => {
+      features.forEach((feature: any) => {
+        const coordinates = feature.geometry.coordinates.map((coord: any) => [coord[1], coord[0]]); // LatLng
+        const geodesicPolyline = L.geodesic(coordinates, {
+          weight: 2,
+          color: "red",
+          wrap: false,
+          dashArray: "5, 10",
+        }).addTo(map);
+
+        bindPopup(feature, geodesicPolyline);
+        geodesicPolylines.current.push(geodesicPolyline);
+      });
+    },
+    [bindPopup]
+  );
 
   useEffect(() => {
     const fetchForecastTrackData = async () => {
@@ -59,21 +64,28 @@ const ForecastTrackLayer: React.FC<ForecastTrackLayerProps> = () => {
           "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer/2/query?outFields=*&where=1%3D1&f=geojson"
         );
         const originalData = response.data;
-        const shiftedDataMinus360 = shiftCoordinates(originalData, -360);
-        const shiftedDataPlus360 = shiftCoordinates(originalData, 360);
+        if (originalData && originalData.features.length > 0) {
+          const shiftedDataMinus360 = shiftCoordinates(originalData, -360);
+          const shiftedDataPlus360 = shiftCoordinates(originalData, 360);
 
-        setForecastTrackData({
-          original: originalData,
-          minus360: shiftedDataMinus360,
-          plus360: shiftedDataPlus360,
-        });
+          setForecastTrackData({
+            original: originalData,
+            minus360: shiftedDataMinus360,
+            plus360: shiftedDataPlus360,
+          });
+          onDataLoad(true);
+        } else {
+          setForecastTrackData(null);
+          onDataLoad(false);
+        }
       } catch (error) {
         console.error("Error fetching forecast track data:", error);
+        onDataLoad(false);
       }
     };
 
     fetchForecastTrackData();
-  }, [shiftCoordinates]);
+  }, [shiftCoordinates, onDataLoad]);
 
   useEffect(() => {
     if (!forecastTrackData || !map) return;

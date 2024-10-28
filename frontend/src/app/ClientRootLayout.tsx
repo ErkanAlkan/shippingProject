@@ -1,17 +1,23 @@
 "use client";
 import React from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import styles from "./ClientRootLayout.module.css";
-import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 import { RouteProvider } from "~/app/context/RouteContext";
 import { LayerProvider } from "~/app/context/LayerContext";
 import { TopbarProvider } from "~/app/context/TopbarContext";
 import { PortProvider } from "~/app/context/PortContext";
 
+const Sidebar = dynamic(() => import("~/app/components/LeftSidebar/LeftSidebar"), { ssr: false });
+
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const showSidebar = pathname !== "/auth/signin";
+  const showSidebar = pathname && pathname !== "/auth/signin";
+
+  if (typeof pathname === "undefined") {
+    return null;
+  }
 
   return (
     <RouteProvider>

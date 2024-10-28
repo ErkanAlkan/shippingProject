@@ -6,7 +6,7 @@ import { useRouteContext } from "~/app/context/RouteContext";
 import { usePortContext } from "~/app/context/PortContext";
 import "leaflet/dist/leaflet.css";
 import "leaflet.geodesic";
-import { showWarningAlert} from "~/utils/sweetAlertUtils";
+import { showWarningAlert } from "~/utils/sweetAlertUtils";
 
 import greenDot from "/public/leaflet/green-dot.png";
 import redDot from "/public/leaflet/red-dot.png";
@@ -100,9 +100,14 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const [intersectionPoint, setIntersectionPoint] = useState<LatLngTuple | null>(null);
   const [forecastConeData, setForecastConeData] = useState<any>(null);
   const [observedTrackData, setObservedTrackData] = useState<any>(null);
+  const [forecastTrackData, setForecastTrackData] = useState<any>(null);
   const [isOriginPopupOpen, setIsOriginPopupOpen] = useState(false);
   const [isDestinationPopupOpen, setIsDestinationPopupOpen] = useState(false);
   const [showPopups, setShowPopups] = useState(true);
+  const [hasForecastConeData, setHasForecastConeData] = useState(false);
+  const [hasObservedTrackData, setHasObservedTrackData] = useState(false);
+  const [hasForecastTrackData, setHasForecastTrackData] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const FirstIcon = icon({
     iconUrl: greenVessel.src,
@@ -239,18 +244,60 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       if (JSON.stringify(forecastConeData) !== JSON.stringify(data)) {
         setForecastConeData(data);
       }
+      setHasForecastConeData(data && data.original && data.original.features && data.original.features.length > 0);
     },
+
     [forecastConeData]
   );
 
   const handleObservedTrackDataLoad = useCallback(
     (data: any) => {
+      console.log("dataObservedTrack:", data);
       if (JSON.stringify(observedTrackData) !== JSON.stringify(data)) {
         setObservedTrackData(data);
       }
+      setHasObservedTrackData(data && data.features && data.features.length > 0);
     },
     [observedTrackData]
   );
+
+  const handleForecastTrackDataLoad = useCallback(
+    (data: any) => {
+      if (JSON.stringify(forecastTrackData) !== JSON.stringify(data)) {
+        setForecastTrackData(data);
+      }
+      setHasForecastTrackData(data);
+    },
+    [forecastTrackData]
+  );
+
+  useEffect(() => {
+    if (hasForecastConeData || hasObservedTrackData || hasForecastTrackData) {
+      setIsDataLoaded(true);
+    }
+  }, [hasForecastConeData, hasObservedTrackData, hasForecastTrackData]);
+
+  useEffect(() => {
+    if (
+      showForecastConeLayer &&
+      showObservedTrackLayer &&
+      showForecastTrackLayer &&
+      isDataLoaded &&
+      !hasForecastConeData &&
+      !hasObservedTrackData &&
+      !hasForecastTrackData
+    ) {
+      showWarningAlert("No cyclone data available to display for any layer.");
+    }
+  }, [
+    showForecastConeLayer,
+    showObservedTrackLayer,
+    showForecastTrackLayer,
+    isDataLoaded,
+    hasForecastConeData,
+    hasObservedTrackData,
+    hasForecastTrackData,
+  ]);
 
   const handleDateLineCrossing = (prev: LatLngTuple | undefined, current: LatLngTuple): LatLngTuple => {
     if (!prev) return current;
@@ -338,7 +385,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       ))}
       {showForecastConeLayer && <ForecastConeLayer onDataLoad={handleForecastConeDataLoad} />}
       {showObservedTrackLayer && <ObservedTrackLayer onDataLoad={handleObservedTrackDataLoad} />}
-      {showForecastTrackLayer && <ForecastTrackLayer />}
+      {showForecastTrackLayer && <ForecastTrackLayer onDataLoad={handleForecastTrackDataLoad} />}
       {adjustedCoordinates.map((position, index) => (
         <Marker
           key={index}
@@ -369,11 +416,11 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
               Point: {index + 1} <br />
               Latitude: {position[0]}, Longitude: {position[1]} <br />
               Cumulative Distance:{" "}
-                  {globalRouteData[index]?.cumulative_dist !== null &&
-                  globalRouteData[index]?.cumulative_dist !== undefined
-                    ? globalRouteData[index].cumulative_dist.toString()
-                    : "N/A"}{" "}
-                  nm<br />
+              {globalRouteData[index]?.cumulative_dist !== null && globalRouteData[index]?.cumulative_dist !== undefined
+                ? globalRouteData[index].cumulative_dist.toString()
+                : "N/A"}{" "}
+              nm
+              <br />
               {index === 0 && globalRouteData?.length > 0 && (
                 <>
                   Origin Port: {globalRouteData[0]?.origin} <br />
