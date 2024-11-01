@@ -8,10 +8,9 @@ export const showLoadingAlert = () => {
     allowOutsideClick: false,
     allowEscapeKey: false,
     customClass: {
-      popup: 'loading-spinner'  // Use this custom class
+      popup: 'loading-spinner'
     },
     didOpen: () => {
-      // Loader is opened
     }
   });
 };

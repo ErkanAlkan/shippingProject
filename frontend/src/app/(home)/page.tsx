@@ -1,47 +1,22 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import Topbar from "./components/Topbar/Topbar";
-import TopbarForCarbon from "./components/TopbarForCarbon/TopbarForCarbon";
-import RightSidebar from "./components/RightSidebar/RightSidebar";
-import styles from "./ClientRootLayout.module.css";
+import Topbar from "~/app/components/Topbar/Topbar";
+import TopbarForCarbon from "~/app/components/TopbarForCarbon/TopbarForCarbon";
+import RightSidebar from "~/app/components/RightSidebar/RightSidebar";
+import styles from "./layout.module.css";
 import { useRouteContext } from "~/app/context/RouteContext";
 import { useLayerContext } from "~/app/context/LayerContext";
 import { useTopbarContext } from "~/app/context/TopbarContext";
+import AuthGuard from "~/app/components/AuthGuard/AuthGuard";
+import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 
 const Map = dynamic(() => import("~/app/components/Map/Map"), { ssr: false });
 
-interface User {
-  email: string;
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 const HomePage = () => {
-  const router = useRouter();
   const { globalRouteData } = useRouteContext();
   const { showCycloneLayers, setShowCycloneLayers } = useLayerContext();
   const { showTopbar, showTopbarForCarbon, toggleTopbar, toggleTopbarForCarbon } = useTopbarContext();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/auth/session`, {
-          withCredentials: true,
-        });
-        console.log("checkUser ~ response:", response);
-        setUser(response.data);
-      } catch (error) {
-        console.log("checkUser ~ error:", error);
-        router.push("/auth/signin");
-      }
-    };
-
-    checkUser();
-  }, [router]);
 
   const toggleAllCycloneLayers = () => {
     setShowCycloneLayers((prev: boolean) => !prev);
@@ -53,8 +28,8 @@ const HomePage = () => {
       : null;
   }, [globalRouteData]);
 
-  if (user) {
-    return (
+  return (
+    <AuthGuard>
       <div className="relative min-h-screen">
         <Map
           showForecastConeLayer={showCycloneLayers}
@@ -74,6 +49,7 @@ const HomePage = () => {
             </div>
           )}
         </div>
+        <Sidebar/>
         <RightSidebar
           onToggleTopbar={toggleTopbar}
           onToggleTopbarForCarbon={toggleTopbarForCarbon}
@@ -83,10 +59,8 @@ const HomePage = () => {
           showCycloneLayers={showCycloneLayers}
         />
       </div>
-    );
-  }
-
-  return null;
+    </AuthGuard>
+  );
 };
 
 export default HomePage;

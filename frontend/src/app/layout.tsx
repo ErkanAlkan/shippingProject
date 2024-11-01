@@ -1,12 +1,11 @@
+//layout.tsx main
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '~/styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import styles from './layout.module.css';
-
-import ClientRootLayout from './ClientRootLayout';
-import { RouteProvider } from '~/app/context/RouteContext';
 import Script from 'next/script';
+import styles from './layout.module.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+
   return (
     <html lang="en">
       <head>
@@ -25,9 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${inter.className} ${styles.root}`}>
-        <RouteProvider>
-          <ClientRootLayout>{children}</ClientRootLayout>
-        </RouteProvider>
+        {children}
       </body>
     </html>
   );

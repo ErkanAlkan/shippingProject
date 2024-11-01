@@ -1,3 +1,5 @@
+//authMiddleware.ts took place of this file
+
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import { Pool } from 'pg';

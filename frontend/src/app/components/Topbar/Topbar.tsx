@@ -27,6 +27,10 @@ const Topbar = () => {
     setSelectedOriginPort,
     selectedDestinationPort,
     setSelectedDestinationPort,
+    middlePoint1,
+    middlePoint2,
+    setMiddlePoint1,
+    setMiddlePoint2,
   } = usePortContext();
   const [middlePointOptions, setMiddlePointOptions] = useState<string[]>([]);
 
@@ -59,6 +63,8 @@ const Topbar = () => {
     });
     setSelectedOriginPort(null);
     setSelectedDestinationPort(null);
+    setMiddlePoint1(null);
+    setMiddlePoint2(null);
     setGlobalRouteData([]);
   };
 
@@ -106,7 +112,6 @@ const Topbar = () => {
     },
   });
   useEffect(() => {
-    console.log("useEffect ~ selectedOriginPort:", selectedOriginPort);
     if (selectedOriginPort) {
       setValue("originPort", selectedOriginPort);
       trigger("originPort");
@@ -114,12 +119,19 @@ const Topbar = () => {
   }, [selectedOriginPort, setValue, trigger]);
 
   useEffect(() => {
-    console.log("useEffect ~ selectedDestinationPort:", selectedDestinationPort);
     if (selectedDestinationPort) {
       setValue("destinationPort", selectedDestinationPort);
       trigger("destinationPort");
     }
   }, [selectedDestinationPort, setValue, trigger]);
+
+  useEffect(() => {
+    if (middlePoint1) setValue("middlePoint1", middlePoint1);
+  }, [middlePoint1, setValue]);
+
+  useEffect(() => {
+    if (middlePoint2) setValue("middlePoint2", middlePoint2);
+  }, [middlePoint2, setValue]);
 
   useEffect(() => {
     if (globalRouteData.length > 0) {
@@ -130,25 +142,24 @@ const Topbar = () => {
       setValue("destinationPort", lastPoint.destination || "");
 
       const middlePoints = globalRouteData.slice(1, globalRouteData.length - 1);
-      let middlePoint1 = "";
-      let middlePoint2 = "";
+      let point1 = "";
+      let point2 = "";
 
       for (const point of middlePoints) {
         if (middlePointOptions.includes(point.origin) || middlePointOptions.includes(point.destination)) {
           const matchedPoint = middlePointOptions.includes(point.origin) ? point.origin : point.destination;
-
-          if (!middlePoint1) {
-            middlePoint1 = matchedPoint;
-            setValue("middlePoint1", matchedPoint);
-          } else if (!middlePoint2 && matchedPoint !== middlePoint1) {
-            middlePoint2 = matchedPoint;
-            setValue("middlePoint2", matchedPoint);
+          if (!point1) {
+            point1 = matchedPoint;
+            setMiddlePoint1(matchedPoint);
+          } else if (!point2 && matchedPoint !== point1) {
+            point2 = matchedPoint;
+            setMiddlePoint2(matchedPoint);
             break;
           }
         }
       }
     }
-  }, [globalRouteData, setValue]);
+  }, [globalRouteData, middlePointOptions, setMiddlePoint1, setMiddlePoint2, setValue]);
 
   const onSubmit = async (data: TopBarFormData) => {
     try {

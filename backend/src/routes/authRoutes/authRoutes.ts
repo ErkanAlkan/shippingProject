@@ -6,6 +6,11 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { Profile as GoogleProfile } from "passport-google-oauth20";
 import { Profile as GitHubProfile } from "passport-github2";
+import jwt from 'jsonwebtoken';
+import { authenticateJWT } from '../../authMiddleware';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = '1h';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -113,21 +118,18 @@ router.post("/login", async (req: Request, res: Response, next) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
-      req.login(user, (err) => {
-        if (err) {
-          console.error("Error logging in:", err);
-          return res.status(500).json({ message: "Internal server error" });
-        }
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET as string, { expiresIn: JWT_EXPIRATION });
 
-        req.session.save((err) => {
-          if (err) {
-            console.error("Error saving session:", err);
-            return res.status(500).json({ message: "Internal server error" });
-          }
-          console.log("Session saved successfully.");
-          return res.status(200).json({ id: user.id, email: user.email });
-        });
+      const isSecure = process.env.NODE_ENV === 'production' || process.env.USE_SECURE_COOKIES === 'true';
+      
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: 'strict',
+        maxAge: 3600000
       });
+      
+      return res.status(200).json({ message: "Logged in successfully" });
     } else {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -138,29 +140,24 @@ router.post("/login", async (req: Request, res: Response, next) => {
 });
 
 
-router.post("/logout", (req: Request, res: Response) => {
-  req.logout((err: Error | null) => {
-    if (err) {
-      return res.status(500).json({ message: "Error logging out" });
-    }
-
-    req.session.destroy((err: Error | null) => {
-      if (err) {
-        return res.status(500).json({ message: "Error destroying session" });
-      }
-
-      res.status(200).json({ message: "Logged out successfully" });
-    });
-  });
+router.get("/protected", authenticateJWT, (req: Request, res: Response) => {
+  const user = req.user as User;
+  res.status(200).json({ message: "This is a protected route", email: user.email });
 });
 
-router.get("/session", (req: Request, res: Response) => {
-  if (req.isAuthenticated() && req.user) {
-    const user = req.user as User;
-    res.status(200).json({ email: user.email });
-  } else {
-    res.status(401).json({ message: "Unauthorized" });
-  }
+router.get("/user", authenticateJWT, (req: Request, res: Response) => {
+  const user = req.user as User;
+  res.status(200).json({ email: user.email });
+});
+
+router.post("/logout", (req: Request, res: Response) => {
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' || process.env.USE_SECURE_COOKIES === 'true',
+    sameSite: 'strict',
+  });
+
+  res.status(200).json({ message: "Logged out successfully." });
 });
 
 router.post("/register", async (req: Request, res: Response) => {

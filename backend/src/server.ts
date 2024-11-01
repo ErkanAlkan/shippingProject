@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import passport from 'passport';
 import { sessionMiddleware } from './sessionSetup';
+import cookieParser from 'cookie-parser';
 import shipRoutes from './routes/shipRoutes/shipRoutes';
 import carbon from './routes/carbonRoutes/carbonRoutes';
 import vessel from './routes/vesselRoutes/vessel';
@@ -38,6 +39,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(sessionMiddleware);
 
 app.use(passport.initialize());

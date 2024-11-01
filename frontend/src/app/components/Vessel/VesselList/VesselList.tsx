@@ -46,9 +46,7 @@ const VesselList: React.FC = () => {
     showLoadingAlert();
     try {
       const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel-list`);
-      
       setVessels(response.data);
-      
     } catch (error) {
       console.error("Error fetching vessels:", error);
       showErrorAlert("Failed to load vessel data.");
