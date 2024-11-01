@@ -121,11 +121,12 @@ router.post("/login", async (req: Request, res: Response, next) => {
       const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET as string, { expiresIn: JWT_EXPIRATION });
 
       const isSecure = process.env.NODE_ENV === 'production' || process.env.USE_SECURE_COOKIES === 'true';
+      console.log("router.post ~ isSecure:", isSecure);
       
       res.cookie('authToken', token, {
         httpOnly: true,
         secure: isSecure,
-        sameSite: 'none',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 3600000
       });
       
@@ -138,6 +139,7 @@ router.post("/login", async (req: Request, res: Response, next) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+      
 
 
 router.get("/protected", authenticateJWT, (req: Request, res: Response) => {
