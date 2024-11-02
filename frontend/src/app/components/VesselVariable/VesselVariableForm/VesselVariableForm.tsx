@@ -55,14 +55,18 @@ const VesselVariableForm: React.FC<VesselVariableFormProps> = ({ vesselId, onSuc
   const onSubmit = async (data: any) => {
     try {
       showLoadingAlert();
-      const response = await axios.post(`${API_BASE_URL}/api/vessel-variable/create-vessel-variable`, {
-        vessel: {
-          connect: {
-            id: vesselId,
+      const response = await axios.post(
+        `${API_BASE_URL}/api/vessel-variable/create-vessel-variable`,
+        {
+          vessel: {
+            connect: {
+              id: vesselId,
+            },
           },
+          ...data,
         },
-        ...data,
-      });
+        { withCredentials: true }
+      );
       Swal.close();
       showSuccessAlert("Vessel variables saved successfully").then((result) => {
         if (result.isConfirmed) {

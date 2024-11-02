@@ -34,7 +34,7 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
   const fetchVesselVariables = async () => {
     showLoadingAlert();
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/vessel-variable/get-vessel-variable-list/${vesselId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/vessel-variable/get-vessel-variable-list/${vesselId}`, { withCredentials: true });
       setVariables(response.data);
       Swal.close();
     } catch (error) {
@@ -47,7 +47,7 @@ const VesselVariablesList: React.FC<VesselVariablesListProps> = ({ vesselId, ref
     const result = await showConfirmAlert('Are you sure?', 'Yes, delete it!');
     if (result.isConfirmed) {
       try {
-        await axios.delete(`${API_BASE_URL}/api/vessel-variable/delete-vessel-variable/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/vessel-variable/delete-vessel-variable/${id}`, { withCredentials: true });
         setVariables(variables.filter((variable) => variable.id !== id));
         showSuccessAlert('Vessel variable has been deleted.');
       } catch (error) {

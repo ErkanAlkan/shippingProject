@@ -91,7 +91,7 @@ const VesselEditForm = ({ vesselId }: { vesselId: string }) => {
       showLoadingAlert();
       try {
         console.log(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
-        const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
+        const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`, { withCredentials: true });
         const vesselData = response.data;
         Object.keys(vesselData).forEach((key) => {
           setValue(key as keyof VesselFormData, vesselData[key]);
@@ -109,7 +109,7 @@ const VesselEditForm = ({ vesselId }: { vesselId: string }) => {
   const onSubmit = async (data: VesselFormData) => {
     showLoadingAlert();
     try {
-      await axios.put(`${API_BASE_URL}/api/vessel/update-vessel/${vesselId}`, data);
+      await axios.put(`${API_BASE_URL}/api/vessel/update-vessel/${vesselId}`, data , { withCredentials: true });
       showSuccessAlert("Vessel is updated successfully").then(() => {
         router.push("/vessel");
       });

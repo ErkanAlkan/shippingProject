@@ -52,7 +52,7 @@ const VesselForm = () => {
   const onSubmit = async (data: any) => {
     console.log("data:", data);
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/vessel/create-vessel`, { ...data });
+      const response = await axios.post(`${API_BASE_URL}/api/vessel/create-vessel`, { ...data }, { withCredentials: true });
       showSuccessAlert("Vessel is created successfully").then(() => {
         router.push("/vessel");
       });

@@ -19,7 +19,6 @@ export const getUniquePorts = async (): Promise<PortWithCoordinates[]> => {
             longitude: true,
         },
     });
-    console.log("getUniquePorts ~ ports:", ports);
 
     const uniquePorts = Array.from(
         new Map(ports.map((port) => [port.origin, port])).values()

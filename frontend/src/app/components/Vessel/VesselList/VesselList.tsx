@@ -45,7 +45,7 @@ const VesselList: React.FC = () => {
   const fetchVessels = async () => {
     showLoadingAlert();
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel-list`);
+      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel-list` , { withCredentials: true });
       setVessels(response.data);
     } catch (error) {
       console.error("Error fetching vessels:", error);
@@ -64,7 +64,7 @@ const VesselList: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`${API_BASE_URL}/api/vessel/delete-vessel/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/vessel/delete-vessel/${id}`, { withCredentials: true });
         setVessels(vessels.filter((vessel) => vessel.id !== id));
         showSuccessAlert("Vessel has been deleted.");
       } catch (error) {

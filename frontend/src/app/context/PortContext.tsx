@@ -44,7 +44,7 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchPorts = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-ports`);
+        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-ports`, { withCredentials: true });
         setPortOptions(response.data);
       } catch (error) {
         console.error("Error fetching port options:", error);

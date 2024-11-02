@@ -2,8 +2,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import passport from 'passport';
-import { sessionMiddleware } from './sessionSetup';
 import cookieParser from 'cookie-parser';
+import { authenticateJWT } from './authMiddleware';
 import shipRoutes from './routes/shipRoutes/shipRoutes';
 import carbon from './routes/carbonRoutes/carbonRoutes';
 import vessel from './routes/vesselRoutes/vessel';
@@ -37,25 +37,23 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 app.use(express.json());
 app.use(cookieParser());
-app.use(sessionMiddleware);
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-app.use('/api/ship', shipRoutes);
-app.use('/api/carbon', carbon);
-app.use('/api/vessel', vessel);
-app.use('/api/vessel-variable', vesselVariable);
 app.use('/api/auth', authRoutes);
-app.use('/api/unique-ports', uniquePorts);
+
+app.use('/api/ship', authenticateJWT, shipRoutes);
+app.use('/api/carbon', authenticateJWT, carbon);
+app.use('/api/vessel', authenticateJWT, vessel);
+app.use('/api/vessel-variable', authenticateJWT, vesselVariable);
+app.use('/api/unique-ports', authenticateJWT, uniquePorts);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Shipping Project API');

@@ -71,7 +71,9 @@ const Topbar = () => {
   useEffect(() => {
     const fetchMiddlePoints = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`);
+        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`, {
+          withCredentials: true,
+        });
         setMiddlePointOptions(response.data);
       } catch (error) {
         console.error("Error fetching middle points:", error);
@@ -164,11 +166,15 @@ const Topbar = () => {
   const onSubmit = async (data: TopBarFormData) => {
     try {
       showLoadingAlert();
-      const response = await axios.post(`${API_BASE_URL}/api/ship/get-route`, {
-        origin: data.originPort,
-        destination: data.destinationPort,
-        middlePoints: [data.middlePoint1, data.middlePoint2].filter(Boolean),
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/ship/get-route`,
+        {
+          origin: data.originPort,
+          destination: data.destinationPort,
+          middlePoints: [data.middlePoint1, data.middlePoint2].filter(Boolean),
+        },
+        { withCredentials: true }
+      );
       const routeData = response.data;
       setGlobalRouteData(routeData);
       Swal.close();

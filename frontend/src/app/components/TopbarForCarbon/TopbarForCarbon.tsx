@@ -144,7 +144,7 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
     };
     showLoadingAlert();
     axios
-      .post(`${API_BASE_URL}/api/carbon/calculate-stats`, submissionData)
+      .post(`${API_BASE_URL}/api/carbon/calculate-stats`, submissionData , { withCredentials: true })
       .then((response) => {
         const { combinedContent } = response.data;
         setCombinedContent(combinedContent);

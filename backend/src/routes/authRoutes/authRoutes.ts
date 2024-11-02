@@ -189,4 +189,8 @@ router.get("/github/callback", passport.authenticate("github", { failureRedirect
   res.redirect(clientURL);
 });
 
+router.get("/test", authenticateJWT, (req: Request, res: Response) => {
+  res.status(200).json({ message: "JWT is valid", user: req.user });
+});
+
 export default router;

@@ -12,7 +12,6 @@ import VesselVariableList from '~/app/components/VesselVariable/VesselVariableLi
 
 const VesselCardPage = () => {
   const { vesselId } = useParams();
-  console.log('vesselId:', vesselId);
 
   if (!vesselId) {
     return <p>Loading...</p>;

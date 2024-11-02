@@ -31,7 +31,7 @@ const VesselCard: React.FC<VesselCardProps> = ({ vesselId }) => {
 
   const fetchVessel = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/vessel/get-vessel/${vesselId}` , { withCredentials: true });
       setVessel(response.data);
     } catch (error) {
       console.error("Error fetching vessel:", error);
