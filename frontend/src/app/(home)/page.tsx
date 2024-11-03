@@ -8,7 +8,6 @@ import styles from "./layout.module.css";
 import { useRouteContext } from "~/app/context/RouteContext";
 import { useLayerContext } from "~/app/context/LayerContext";
 import { useTopbarContext } from "~/app/context/TopbarContext";
-import AuthGuard from "~/app/components/AuthGuard/AuthGuard";
 import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 
 const Map = dynamic(() => import("~/app/components/Map/Map"), { ssr: false });
@@ -29,7 +28,6 @@ const HomePage = () => {
   }, [globalRouteData]);
 
   return (
-    <AuthGuard>
       <div className="relative min-h-screen">
         <Map
           showForecastConeLayer={showCycloneLayers}
@@ -59,7 +57,6 @@ const HomePage = () => {
           showCycloneLayers={showCycloneLayers}
         />
       </div>
-    </AuthGuard>
   );
 };
 

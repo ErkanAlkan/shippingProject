@@ -5,12 +5,11 @@ import React from "react";
 import Link from "next/link";
 import { Button, Card, Row, Col } from "react-bootstrap";
 import VesselList from "~/app/components/Vessel/VesselList/VesselList";
-import AuthGuard from "~/app/components/AuthGuard/AuthGuard";
 import Sidebar from "~/app/components/LeftSidebar/LeftSidebar";
 
 const VesselPage = () => {
   return (
-    <AuthGuard>
+    <div>
       <Sidebar />
       <Card>
         <Card.Body>
@@ -26,7 +25,7 @@ const VesselPage = () => {
           </Row>
         </Card.Body>
       </Card>
-    </AuthGuard>
+    </div>
   );
 };
 
