@@ -16,6 +16,7 @@ const HomePage = () => {
   const { globalRouteData } = useRouteContext();
   const { showCycloneLayers, setShowCycloneLayers } = useLayerContext();
   const { showTopbar, showTopbarForCarbon, toggleTopbar, toggleTopbarForCarbon } = useTopbarContext();
+  console.log("HomePage ~ showTopbarForCarbon:", showTopbarForCarbon);
 
   const toggleAllCycloneLayers = () => {
     setShowCycloneLayers((prev: boolean) => !prev);
@@ -28,35 +29,33 @@ const HomePage = () => {
   }, [globalRouteData]);
 
   return (
-      <div className="relative min-h-screen">
-        <Map
-          showForecastConeLayer={showCycloneLayers}
-          showObservedTrackLayer={showCycloneLayers}
-          showForecastTrackLayer={showCycloneLayers}
-        />
-        <div className={styles.flexContainer}>
-          {showTopbar && (
-            <div className={styles.topbarContainer}>
-              <Topbar />
-            </div>
-          )}
+    <div className="relative min-h-screen">
+      <Map
+        showForecastConeLayer={showCycloneLayers}
+        showObservedTrackLayer={showCycloneLayers}
+        showForecastTrackLayer={showCycloneLayers}
+      />
+      <div className={styles.flexContainer}>
+        {showTopbar && (
+          <div className={styles.topbarContainer}>
+            <Topbar />
+          </div>
+        )}
 
-          {showTopbarForCarbon && totalDistance && (
-            <div className={styles.topbarForCarbonContainer}>
-              <TopbarForCarbon totalDistance={totalDistance} globalRouteData={globalRouteData} />
-            </div>
-          )}
+        <div className={`${styles.topbarForCarbonContainer} ${!showTopbarForCarbon ? styles.hidden : ""}`}>
+          {totalDistance && <TopbarForCarbon totalDistance={totalDistance} globalRouteData={globalRouteData} />}
         </div>
-        <Sidebar/>
-        <RightSidebar
-          onToggleTopbar={toggleTopbar}
-          onToggleTopbarForCarbon={toggleTopbarForCarbon}
-          onToggleAllCycloneLayers={toggleAllCycloneLayers}
-          showTopbar={showTopbar}
-          showTopbarForCarbon={showTopbarForCarbon}
-          showCycloneLayers={showCycloneLayers}
-        />
       </div>
+      <Sidebar />
+      <RightSidebar
+        onToggleTopbar={toggleTopbar}
+        onToggleTopbarForCarbon={toggleTopbarForCarbon}
+        onToggleAllCycloneLayers={toggleAllCycloneLayers}
+        showTopbar={showTopbar}
+        showTopbarForCarbon={showTopbarForCarbon}
+        showCycloneLayers={showCycloneLayers}
+      />
+    </div>
   );
 };
 

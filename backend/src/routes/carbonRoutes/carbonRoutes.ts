@@ -67,8 +67,13 @@ router.post("/calculate-stats", async (req, res) => {
     let tableContent1;
 
     if (inputType === 0) {
+      console.log("-----totalTime:", totalTime);
+      console.log("-------departureDate: ", departureDate);
+      console.log("------arrivalDate: ", arrivalDate);
       tableContent1 = calculateSpeed(totalTime, totalDistance, departureDate, arrivalDate);
     } else if (inputType === 1) {
+      console.log("+++++++departureDate: ", departureDate);
+      console.log("++++++arrivalDate: ", arrivalDate);
       tableContent1 = calculateTime(averageSpeed, totalDistance, departureDate, arrivalDate);
     } else if (inputType === 2) {
       tableContent1 = calculateTimeDifference(totalDistance, departureDate, arrivalDate);
@@ -98,10 +103,13 @@ router.post("/calculate-stats", async (req, res) => {
         totalTime
       );
 
-      const speedPlus1 = tableContent1?.averageSpeed + 1;
-      const speedPlus2 = tableContent1?.averageSpeed + 2;
-      const speedMinus1 = tableContent1?.averageSpeed - 1;
-      const speedMinus2 = tableContent1?.averageSpeed - 2;
+      const roundToTwoDecimals = (value: number): number => {
+        return Math.round(value * 100) / 100;
+      };
+      const speedPlus1 = roundToTwoDecimals((tableContent1?.averageSpeed ?? 0) + 1);
+      const speedPlus2 = roundToTwoDecimals((tableContent1?.averageSpeed ?? 0) + 2);
+      const speedMinus1 = roundToTwoDecimals((tableContent1?.averageSpeed ?? 0) - 1);
+      const speedMinus2 = roundToTwoDecimals((tableContent1?.averageSpeed ?? 0) - 2);
 
       let tableContent1SpeedPlus1 = calculateTime(speedPlus1, totalDistance, departureDate, arrivalDate);
       tableContent1SpeedPlus1.totalTime = Math.round(tableContent1SpeedPlus1.totalTime * 10) / 10;
@@ -183,31 +191,30 @@ router.post("/calculate-stats", async (req, res) => {
           ...tableContent1SpeedMinus2,
           ...tableContent2SpeedMinus2,
         },
-          
+
         {
           speed: speedMinus1,
           ...tableContent1SpeedMinus1,
           ...tableContent2SpeedMinus1,
         },
-          
+
         {
           speed: tableContent1.averageSpeed,
           ...tableContent1,
           ...tableContent2,
         },
-          
+
         {
           speed: speedPlus1,
           ...tableContent1SpeedPlus1,
           ...tableContent2SpeedPlus1,
         },
-          
+
         {
           speed: speedPlus2,
           ...tableContent1SpeedPlus2,
           ...tableContent2SpeedPlus2,
         },
-          
       ];
       const result = {
         message: "Data processed successfully",

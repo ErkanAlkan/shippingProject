@@ -31,8 +31,8 @@ const Topbar = () => {
     middlePoint2,
     setMiddlePoint1,
     setMiddlePoint2,
+    middlePointOptions,
   } = usePortContext();
-  const [middlePointOptions, setMiddlePointOptions] = useState<string[]>([]);
 
   const portNames = portOptions.map((port) => port.origin);
 
@@ -54,6 +54,24 @@ const Topbar = () => {
     await trigger("destinationPort");
   };
 
+  const handleMiddlePoint1Change = async (value: string) => {
+    if (value === "") {
+      setMiddlePoint1(null);
+    } else {
+      setMiddlePoint1(value);
+    }
+    await trigger("middlePoint1");
+  };
+
+  const handleMiddlePoint2Change = async (value: string) => {
+    if (value === "") {
+      setMiddlePoint2(null);
+    } else {
+      setMiddlePoint2(value);
+    }
+    await trigger("middlePoint2");
+  };
+
   const handleReset = () => {
     reset({
       originPort: "",
@@ -68,26 +86,15 @@ const Topbar = () => {
     setGlobalRouteData([]);
   };
 
-  useEffect(() => {
-    const fetchMiddlePoints = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`, {
-          withCredentials: true,
-        });
-        setMiddlePointOptions(response.data);
-      } catch (error) {
-        console.error("Error fetching middle points:", error);
-        showErrorAlert("Failed to fetch middle points");
-      }
-    };
-
-    fetchMiddlePoints();
-  }, []);
-
   const validationSchema = Yup.object().shape({
     originPort: Yup.string().required("Origin Port is required").oneOf(portNames, "Select a valid port"),
     middlePoint1: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
-    middlePoint2: Yup.string().oneOf(["", ...middlePointOptions], "Select a valid middle"),
+    middlePoint2: Yup.string()
+      .oneOf(["", ...middlePointOptions], "Select a valid middle")
+      .test("not-same-as-middlePoint1", "Same as Middle Point 1", function (value) {
+        const { middlePoint1 } = this.parent;
+        return middlePoint1 === "" || value !== middlePoint1;
+      }),
     destinationPort: Yup.string()
       .required("Destination Port is required")
       .oneOf(portNames, "Select a valid port")
@@ -129,39 +136,13 @@ const Topbar = () => {
 
   useEffect(() => {
     if (middlePoint1) setValue("middlePoint1", middlePoint1);
-  }, [middlePoint1, setValue]);
+    trigger("middlePoint1");
+  }, [middlePoint1, setValue, trigger]);
 
   useEffect(() => {
     if (middlePoint2) setValue("middlePoint2", middlePoint2);
-  }, [middlePoint2, setValue]);
-
-  useEffect(() => {
-    if (globalRouteData.length > 0) {
-      const firstPoint = globalRouteData[0];
-      const lastPoint = globalRouteData[globalRouteData.length - 1];
-
-      setValue("originPort", firstPoint.origin || "");
-      setValue("destinationPort", lastPoint.destination || "");
-
-      const middlePoints = globalRouteData.slice(1, globalRouteData.length - 1);
-      let point1 = "";
-      let point2 = "";
-
-      for (const point of middlePoints) {
-        if (middlePointOptions.includes(point.origin) || middlePointOptions.includes(point.destination)) {
-          const matchedPoint = middlePointOptions.includes(point.origin) ? point.origin : point.destination;
-          if (!point1) {
-            point1 = matchedPoint;
-            setMiddlePoint1(matchedPoint);
-          } else if (!point2 && matchedPoint !== point1) {
-            point2 = matchedPoint;
-            setMiddlePoint2(matchedPoint);
-            break;
-          }
-        }
-      }
-    }
-  }, [globalRouteData, middlePointOptions, setMiddlePoint1, setMiddlePoint2, setValue]);
+    trigger("middlePoint2");
+  }, [middlePoint2, setValue, trigger]);
 
   const onSubmit = async (data: TopBarFormData) => {
     try {
@@ -227,8 +208,8 @@ const Topbar = () => {
         {renderInput("destinationPort", "Destination Port", portNames, handleDestinationChange)}
       </div>
       <div className={styles.row}>
-        {renderInput("middlePoint1", "Middle Point 1", middlePointOptions, () => {})}
-        {renderInput("middlePoint2", "Middle Point 2", middlePointOptions, () => {})}
+        {renderInput("middlePoint1", "Middle Point 1", middlePointOptions, handleMiddlePoint1Change)}
+        {renderInput("middlePoint2", "Middle Point 2", middlePointOptions, handleMiddlePoint2Change)}
       </div>
       <div className={styles.buttonRow}>
         <button type="submit" className={styles.submitButton}>

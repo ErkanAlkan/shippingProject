@@ -41,16 +41,11 @@ export const calculateWettedHullExponent = (L: number, B: number, D1: number, D2
 
 // Function to calculate the speed exponent
 export const calculateSpeedExponent = (V1: number, V2: number, P1: number, P2: number): number => {
-  console.log("calculateSpeedExponent ~ P2:", P2);
-  console.log("calculateSpeedExponent ~ P1:", P1);
-  console.log("calculateSpeedExponent ~ V2:", V2);
-  console.log("calculateSpeedExponent ~ V1:", V1);
   if (V1 <= 0 || V2 <= 0 || P1 <= 0 || P2 <= 0) {
     throw new Error("All inputs must be positive numbers greater than zero.");
   }
 
   const n: number = Math.log(P2 / P1) / Math.log(V2 / V1);
-  console.log("calculateSpeedExponent ~ n:", n);
   return n;
 };
 
@@ -74,13 +69,6 @@ export const powerRequiredModified = (
   wettedHullExponent: number, // wetted hull area exponent
   speedExponent: number // speed exponent
 ): number => {
-  console.log("speedExponent:", speedExponent);
-  console.log("wettedHullExponent:", wettedHullExponent);
-  console.log("wNew:", wNew);
-  console.log("wRef:", wRef);
-  console.log("vNew:", vNew);
-  console.log("pRef:", pRef);
-  console.log("vRef:", vRef);
   return pRef * Math.pow(wNew / wRef, wettedHullExponent) * Math.pow(vNew / vRef, speedExponent);
 };
 
@@ -178,7 +166,10 @@ export const calculateTime = (
   averageSpeed: number;
   totalDistance: number;
 } => {
-  const totalTime = totalDistance / averageSpeed / 24; // in days
+  const totalTime = totalDistance / averageSpeed / 24;
+  console.log("totalTime:", totalTime);
+  console.log("departureDate: ", departureDate);
+  console.log("arrivalDate: ", arrivalDate);
 
   if (typeof departureDate === "string") {
     departureDate = new Date(departureDate);
@@ -190,9 +181,11 @@ export const calculateTime = (
 
   if (departureDate !== null && arrivalDate === null) {
     const arrivalDateInMilliseconds = departureDate.getTime() + totalTime * 60 * 60 * 1000 * 24;
+    console.log("arrivalDateInMilliseconds:", arrivalDateInMilliseconds);
     arrivalDate = new Date(arrivalDateInMilliseconds);
   } else if (departureDate === null && arrivalDate !== null) {
     const departureDateInMilliseconds = arrivalDate.getTime() - totalTime * 60 * 60 * 1000 * 24;
+    console.log("departureDateInMilliseconds:", departureDateInMilliseconds);
     departureDate = new Date(departureDateInMilliseconds);
   }
 
@@ -211,7 +204,7 @@ export const calculateSpeed = (
   averageSpeed: number;
   totalDistance: number;
 } => {
-  const averageSpeed = totalDistance / (totalTime * 24);
+  const averageSpeed = Math.round((totalDistance / (totalTime * 24)) * 100) / 100;
 
   if (typeof departureDate === "string") {
     departureDate = new Date(departureDate);
@@ -222,10 +215,10 @@ export const calculateSpeed = (
   }
 
   if (departureDate !== null && arrivalDate === null) {
-    const arrivalDateInMilliseconds = departureDate.getTime() + totalTime * 24 * 60 * 1000;
+    const arrivalDateInMilliseconds = departureDate.getTime() + totalTime * 24 * 60 * 1000 *24;
     arrivalDate = new Date(arrivalDateInMilliseconds);
   } else if (departureDate === null && arrivalDate !== null) {
-    const departureDateInMilliseconds = arrivalDate.getTime() - totalTime * 24 * 60 * 1000;
+    const departureDateInMilliseconds = arrivalDate.getTime() - totalTime * 24 * 60 * 1000 *24;
     departureDate = new Date(departureDateInMilliseconds);
   }
 

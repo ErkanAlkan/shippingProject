@@ -50,7 +50,7 @@ export default function SignIn() {
     <div className={styles.signInBackground}>
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-6">
+          <div className="col-md-4">
             <div className={`${styles.cardCustom} card`}>
               <div className="card-body">
                 <h3 className="card-title text-center mb-4">Sign In</h3>

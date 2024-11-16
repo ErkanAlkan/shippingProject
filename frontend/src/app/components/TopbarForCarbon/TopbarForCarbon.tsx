@@ -296,8 +296,8 @@ const TopbarForCarbon: React.FC<TopbarForCarbonProps> = ({ totalDistance }) => {
                   {...field}
                   type="datetime-local"
                   placeholder="Departure date and Time"
-                  value={formatDateTimeInput(field.value ?? null)} // Handle undefined by converting to null
-                  onChange={(e) => handleDateChange(e.target.value, field.onChange)} // Handle change with updated function
+                  value={formatDateTimeInput(field.value ?? null)}
+                  onChange={(e) => handleDateChange(e.target.value, field.onChange)}
                   className={styles.input}
                 />
               )}

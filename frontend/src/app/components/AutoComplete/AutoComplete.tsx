@@ -20,8 +20,10 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
     const [showOptions, setShowOptions] = useState(false);
 
     useEffect(() => {
-      setFilteredOptions(options);
-    }, [options]);
+      if (inputValue === "") {
+        setFilteredOptions(options);
+      }
+    }, [inputValue, options]);
 
     useEffect(() => {
       if (value !== inputValue) {
@@ -61,6 +63,7 @@ const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps<any>>(
 
     const clearInput = () => {
       setInputValue("");
+      setFilteredOptions(options);
       onChange("");
       if (onSelectionChange) {
         onSelectionChange("");
