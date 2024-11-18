@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styles from "./LeftSidebar.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faShip, faUser, faRightFromBracket, faHouse } from "@fortawesome/free-solid-svg-icons";
@@ -39,6 +39,19 @@ const MenuItem = ({
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(true);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    timerRef.current = setTimeout(() => setCollapsed(false), 500);
+  };
+
+  const handleMouseLeave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setCollapsed(true);
+  };
 
   const menuItems = [
     { href: "/", icon: faHouse, label: "Home" },
@@ -62,8 +75,8 @@ const Sidebar = () => {
   return (
     <div
       className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
-      onMouseEnter={() => setCollapsed(false)}
-      onMouseLeave={() => setCollapsed(true)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <ul className={styles.menu}>
         <li className={styles.logoArea}>
