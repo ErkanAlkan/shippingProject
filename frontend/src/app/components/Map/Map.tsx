@@ -108,6 +108,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const [hasObservedTrackData, setHasObservedTrackData] = useState(false);
   const [hasForecastTrackData, setHasForecastTrackData] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isIntersectionChecked, setIsIntersectionChecked] = useState(false);
 
   const FirstIcon = icon({
     iconUrl: greenVessel.src,
@@ -152,6 +153,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   }, [globalRouteData]);
 
   useEffect(() => {
+    console.log("useEffect called");
     const checkIntersectionsWithFeatures = (
       features: any[],
       adjustedCoordinates: LatLngTuple[],
@@ -219,11 +221,11 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
 
       let intersection: LatLngTuple | null = null;
 
-      if (forecastConeData) {
+      if (forecastConeData && showForecastConeLayer) {
         intersection = handleConeDataIntersection(adjustedCoordinates);
       }
 
-      if (!intersection && observedTrackData) {
+      if (!intersection && showObservedTrackLayer) {
         intersection = handleTrackDataIntersection(adjustedCoordinates);
       }
 
@@ -234,10 +236,11 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
         setIntersectionPoint(null);
         console.log("No intersection found.");
       }
+      setIsIntersectionChecked(true);
     };
 
     findAndHandleIntersection();
-  }, [forecastConeData, observedTrackData, adjustedCoordinates]);
+  }, [forecastConeData, observedTrackData, adjustedCoordinates, showForecastConeLayer, showObservedTrackLayer]);
 
   const handleForecastConeDataLoad = useCallback(
     (data: any) => {
@@ -436,11 +439,13 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
         </Marker>
       ))}
       {adjustedCoordinates.length > 1 && <GeodesicPolyline positions={adjustedCoordinates} />}
-      {intersectionPoint ? (
-        <SetViewOnRouteData center={intersectionPoint} />
-      ) : (
-        center && <SetViewOnRouteData center={center} />
-      )}
+      {isIntersectionChecked ? (
+        intersectionPoint ? (
+          <SetViewOnRouteData center={intersectionPoint} />
+        ) : (
+          center && <SetViewOnRouteData center={center} />
+        )
+      ) : null}
     </MapContainer>
   );
 };
