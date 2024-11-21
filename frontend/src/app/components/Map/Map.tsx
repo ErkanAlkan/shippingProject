@@ -285,6 +285,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       showForecastConeLayer &&
       showObservedTrackLayer &&
       showForecastTrackLayer &&
+      isDataLoaded &&
       !hasForecastConeData &&
       !hasObservedTrackData &&
       !hasForecastTrackData
@@ -295,6 +296,7 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
     showForecastConeLayer,
     showObservedTrackLayer,
     showForecastTrackLayer,
+    isDataLoaded,
     hasForecastConeData,
     hasObservedTrackData,
     hasForecastTrackData,
