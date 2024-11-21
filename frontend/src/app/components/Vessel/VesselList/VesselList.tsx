@@ -64,10 +64,13 @@ const VesselList: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
+        showLoadingAlert();
         await axios.delete(`${API_BASE_URL}/api/vessel/delete-vessel/${id}`, { withCredentials: true });
         setVessels(vessels.filter((vessel) => vessel.id !== id));
+        Swal.close();
         showSuccessAlert("Vessel has been deleted.");
       } catch (error) {
+        Swal.close();
         console.error("Error deleting vessel:", error);
         showErrorAlert("Failed to delete vessel.");
       }

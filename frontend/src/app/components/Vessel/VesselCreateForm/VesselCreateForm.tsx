@@ -6,7 +6,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import axios from "axios";
 import { Form } from "react-bootstrap";
-import { showErrorAlert, showSuccessAlert } from "~/utils/sweetAlertUtils";
+import { showErrorAlert, showSuccessAlert, showLoadingAlert } from "~/utils/sweetAlertUtils";
+import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -52,11 +53,14 @@ const VesselForm = () => {
   const onSubmit = async (data: any) => {
     console.log("data:", data);
     try {
+      showLoadingAlert();
       const response = await axios.post(`${API_BASE_URL}/api/vessel/create-vessel`, { ...data }, { withCredentials: true });
+      Swal.close();
       showSuccessAlert("Vessel is created successfully").then(() => {
         router.push("/vessel");
       });
     } catch (error) {
+      Swal.close();
       showErrorAlert("An error occurred while creating vessel!");
       console.error("Error fetching route data:", error);
     }
