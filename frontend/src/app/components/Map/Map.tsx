@@ -105,8 +105,11 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   const [isDestinationPopupOpen, setIsDestinationPopupOpen] = useState(false);
   const [showPopups, setShowPopups] = useState(true);
   const [hasForecastConeData, setHasForecastConeData] = useState(false);
+  const [zeroForecastConeData, setZeroForecastConeData] = useState(false);
   const [hasObservedTrackData, setHasObservedTrackData] = useState(false);
+  const [zeroObservedTrackData, setZeroObservedTrackData] = useState(false);
   const [hasForecastTrackData, setHasForecastTrackData] = useState(false);
+  const [zeroForecastTrackData, setZeroForecastTrackData] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isIntersectionChecked, setIsIntersectionChecked] = useState(false);
 
@@ -153,7 +156,6 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
   }, [globalRouteData]);
 
   useEffect(() => {
-    console.log("useEffect called");
     const checkIntersectionsWithFeatures = (
       features: any[],
       adjustedCoordinates: LatLngTuple[],
@@ -244,10 +246,12 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
 
   const handleForecastConeDataLoad = useCallback(
     (data: any) => {
+      console.log("dataforecastConeData:", data);
       if (JSON.stringify(forecastConeData) !== JSON.stringify(data)) {
         setForecastConeData(data);
       }
       setHasForecastConeData(data && data.original && data.original.features && data.original.features.length > 0);
+      setZeroForecastConeData(data && data.original && data.original.features && data.original.features.length === 0);
     },
 
     [forecastConeData]
@@ -259,48 +263,46 @@ const Map: React.FC<MapProps> = ({ showForecastConeLayer, showObservedTrackLayer
       if (JSON.stringify(observedTrackData) !== JSON.stringify(data)) {
         setObservedTrackData(data);
       }
-      setHasObservedTrackData(data && data.features && data.features.length > 0);
+      setHasObservedTrackData(data && data.original && data.original.features && data.original.features.length > 0);
+      setZeroObservedTrackData(data && data.original && data.original.features && data.original.features.length === 0);
     },
     [observedTrackData]
   );
 
   const handleForecastTrackDataLoad = useCallback(
     (data: any) => {
+      console.log("dataaaaa: ", data);
       if (JSON.stringify(forecastTrackData) !== JSON.stringify(data)) {
         setForecastTrackData(data);
       }
       setHasForecastTrackData(data);
+      if (data === false) {
+        console.log("it is false");
+        setZeroForecastTrackData(true);
+      }
+      setZeroForecastTrackData(true);
     },
     [forecastTrackData]
   );
 
   useEffect(() => {
-    if (hasForecastConeData || hasObservedTrackData || hasForecastTrackData) {
+    console.log("useEffect ~ zeroForecastTrackData:", zeroForecastTrackData);
+    console.log("useEffect ~ zeroObservedTrackData:", zeroObservedTrackData);
+    console.log("useEffect ~ zeroForecastConeData:", zeroForecastConeData);
+    if (zeroForecastConeData && zeroObservedTrackData && zeroForecastTrackData) {
       setIsDataLoaded(true);
     }
-  }, [hasForecastConeData, hasObservedTrackData, hasForecastTrackData]);
+  }, [zeroForecastConeData, zeroObservedTrackData, zeroForecastTrackData]);
 
   useEffect(() => {
-    if (
-      showForecastConeLayer &&
-      showObservedTrackLayer &&
-      showForecastTrackLayer &&
-      isDataLoaded &&
-      !hasForecastConeData &&
-      !hasObservedTrackData &&
-      !hasForecastTrackData
-    ) {
+    console.log("useEffect ~ showForecastConeLayer:", showForecastConeLayer);
+    console.log("useEffect ~ showObservedTrackLayer:", showObservedTrackLayer);
+    console.log("useEffect ~ showForecastTrackLayer:", showForecastTrackLayer);
+    console.log("useEffect ~ isDataLoaded:", isDataLoaded);
+    if (showForecastConeLayer && showObservedTrackLayer && showForecastTrackLayer && isDataLoaded) {
       showWarningAlert("No cyclone data available to display for any layer.");
     }
-  }, [
-    showForecastConeLayer,
-    showObservedTrackLayer,
-    showForecastTrackLayer,
-    isDataLoaded,
-    hasForecastConeData,
-    hasObservedTrackData,
-    hasForecastTrackData,
-  ]);
+  }, [showForecastConeLayer, showObservedTrackLayer, showForecastTrackLayer, isDataLoaded]);
 
   const handleDateLineCrossing = (prev: LatLngTuple | undefined, current: LatLngTuple): LatLngTuple => {
     if (!prev) return current;

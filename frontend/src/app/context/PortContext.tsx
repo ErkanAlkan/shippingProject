@@ -45,7 +45,6 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
   const [middlePointOptions, setMiddlePointOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log("called fetchPorts");
     const fetchPorts = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-ports`, { withCredentials: true });
@@ -60,7 +59,6 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    console.log("called fetchMiddlePoints");
     const fetchMiddlePoints = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/unique-ports/get-middle-points`, {
