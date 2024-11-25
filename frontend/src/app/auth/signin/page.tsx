@@ -46,6 +46,29 @@ export default function SignIn() {
     window.location.href = redirectUri;
   };
 
+  const handleGuestLogin = async () => {
+    try {
+      showLoadingAlert();
+      const guestCredentials = {
+        email: "guest1@guest.com",
+        password: "guestpassword123",
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, guestCredentials, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        window.location.href = "/";
+      }
+    } catch (error) {
+      setError("Guest login failed");
+      console.error("Guest login error:", error);
+    } finally {
+      Swal.close();
+    }
+  };
+
   return (
     <div className={styles.signInBackground}>
       <div className="container">
@@ -95,6 +118,13 @@ export default function SignIn() {
                 </div>
 
                 <div className="text-center mb-3">
+                  <button
+                    className="btn btn-outline-primary w-100 mb-2"
+                    style={{ borderRadius: "50px", border: "1px solid #ddd" }}
+                    onClick={handleGuestLogin}
+                  >
+                    Continue as Guest
+                  </button>
                   <button
                     className="btn btn-outline-secondary w-100 mb-2"
                     style={{ borderRadius: "50px", border: "1px solid #ddd" }}
